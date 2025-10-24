@@ -5,7 +5,7 @@ A Python-based solution for generating standardized, professional project report
 ## Features
 
 - **Multiple Report Types**: Feature development, program management, and engineering initiatives
-- **Flexible Output Formats**: Markdown, HTML, and PDF support
+- **Flexible Output Formats**: Markdown, HTML, PDF, and Word (DOCX) support
 - **Template-Based**: Fully customizable Jinja2 templates
 - **CLI & Python API**: Use via command-line or programmatically
 - **Data Validation**: Pydantic models ensure data integrity
@@ -127,6 +127,20 @@ Print-ready format for distribution:
 report-gen generate data.yaml -t feature_dev -o report.pdf
 ```
 
+### Word Document (DOCX)
+
+Perfect for email distribution and collaboration:
+
+```bash
+report-gen generate data.yaml -t feature_dev -o report.docx
+```
+
+The DOCX format is ideal for:
+- Sending reports via email
+- Sharing with stakeholders who prefer Microsoft Word
+- Further editing and customization in Word
+- Corporate environments requiring .docx format
+
 ## Python API
 
 Use programmatically in your Python code:
@@ -213,9 +227,9 @@ report-gen generate <data-file> -t <type> -o <output> [options]
 Options:
   -t, --type       Report type (feature_dev, program_mgmt, engineering_init)
   -o, --output     Output file path
-  -f, --format     Output format (markdown, html, pdf) [auto-detected]
+  -f, --format     Output format (markdown, html, pdf, docx) [auto-detected]
   --template-dir   Custom templates directory
-  --template       Custom template name
+  --template       Custom template name (not applicable for DOCX)
 ```
 
 ### Initialize Sample Data
@@ -307,7 +321,8 @@ report-template/
 │       ├── formatters/            # Output formatters
 │       │   ├── markdown.py
 │       │   ├── html.py
-│       │   └── pdf.py
+│       │   ├── pdf.py
+│       │   └── docx.py
 │       └── templates/             # Jinja2 templates
 │           ├── feature_dev.md.j2
 │           ├── feature_dev.html.j2
@@ -328,6 +343,7 @@ report-template/
 - pydantic >= 2.0.0
 - click >= 8.1.0
 - markdown >= 3.4.0
+- python-docx >= 1.0.0
 - weasyprint >= 59.0 (optional, for PDF generation)
 
 ## Contributing

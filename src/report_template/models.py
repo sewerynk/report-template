@@ -23,6 +23,7 @@ class OutputFormat(str, Enum):
     MARKDOWN = "markdown"
     HTML = "html"
     PDF = "pdf"
+    DOCX = "docx"
 
 
 class Status(str, Enum):

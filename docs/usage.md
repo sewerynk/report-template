@@ -148,6 +148,26 @@ pip install weasyprint
 report-gen generate data.yaml -t feature_dev -o report.pdf -f pdf
 ```
 
+### Word Document (DOCX)
+
+Microsoft Word format, perfect for email distribution:
+
+```bash
+report-gen generate data.yaml -t feature_dev -o report.docx -f docx
+# Or let it auto-detect from extension:
+report-gen generate data.yaml -t feature_dev -o report.docx
+```
+
+**Benefits of DOCX format:**
+- Easy to email to stakeholders
+- Compatible with Microsoft Word, Google Docs, LibreOffice
+- Can be further edited and customized
+- Works well in corporate environments
+- Professional formatting with tables and styles
+- No additional dependencies required
+
+**Note:** DOCX reports are generated programmatically and don't use Jinja2 templates. They automatically include all report sections with professional formatting.
+
 ## Data File Formats
 
 ### YAML (Recommended)

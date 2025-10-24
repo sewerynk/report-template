@@ -67,9 +67,12 @@ class ReportGenerator:
             OutputFormat.MARKDOWN: "md",
             OutputFormat.HTML: "html",
             OutputFormat.PDF: "html",  # PDF uses HTML template + conversion
+            OutputFormat.DOCX: None,  # DOCX doesn't use templates
         }
 
         ext = format_ext[output_format]
+        if ext is None:
+            return None
         return f"{report_type.value}.{ext}.j2"
 
     def generate(
@@ -78,7 +81,7 @@ class ReportGenerator:
         report_type: ReportType,
         output_format: OutputFormat = OutputFormat.MARKDOWN,
         template_name: Optional[str] = None,
-    ) -> str:
+    ) -> Union[str, bytes]:
         """
         Generate a report from data.
 
@@ -89,13 +92,19 @@ class ReportGenerator:
             template_name: Optional custom template name. If None, uses default for report_type.
 
         Returns:
-            Rendered report as a string.
+            Rendered report as a string (for text formats) or bytes (for binary formats).
         """
         # Convert Pydantic model to dict if needed
         if isinstance(report_data, ReportData):
             data_dict = report_data.model_dump(mode="python")
         else:
             data_dict = report_data
+
+        # Handle DOCX format separately (doesn't use templates)
+        if output_format == OutputFormat.DOCX:
+            from report_template.formatters.docx import create_docx_report
+
+            return create_docx_report(data_dict, report_type.value)
 
         # Load template
         if template_name is None:
@@ -144,6 +153,8 @@ class ReportGenerator:
                 ".markdown": OutputFormat.MARKDOWN,
                 ".html": OutputFormat.HTML,
                 ".pdf": OutputFormat.PDF,
+                ".docx": OutputFormat.DOCX,
+                ".doc": OutputFormat.DOCX,
             }
             output_format = ext_to_format.get(
                 output_path.suffix.lower(), OutputFormat.MARKDOWN
@@ -153,7 +164,7 @@ class ReportGenerator:
         content = self.generate(report_data, report_type, output_format, template_name)
 
         # Write to file
-        mode = "wb" if output_format == OutputFormat.PDF else "w"
+        mode = "wb" if output_format in [OutputFormat.PDF, OutputFormat.DOCX] else "w"
         with open(output_path, mode) as f:
             if isinstance(content, bytes):
                 f.write(content)

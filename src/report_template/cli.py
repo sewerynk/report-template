@@ -92,7 +92,11 @@ def generate(
     report-gen generate data.json -t program_mgmt -o report.pdf
 
     \b
-    # Use custom template
+    # Generate a Word document for email distribution
+    report-gen generate data.yaml -t feature_dev -o report.docx
+
+    \b
+    # Use custom template (not applicable for DOCX)
     report-gen generate data.yaml -t feature_dev -o report.md --template my_template.md.j2
     """
     try:
