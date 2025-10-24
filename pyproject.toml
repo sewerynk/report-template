@@ -1,0 +1,78 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "report-template"
+version = "0.1.0"
+description = "A Python-based solution for generating standardized, professional project reports"
+readme = "README.md"
+requires-python = ">=3.8"
+license = {text = "MIT"}
+authors = [
+    {name = "Your Name", email = "your.email@example.com"}
+]
+keywords = ["reports", "documentation", "project-management", "templates"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+]
+
+dependencies = [
+    "jinja2>=3.1.0",
+    "pyyaml>=6.0",
+    "markdown>=3.4.0",
+    "weasyprint>=59.0",
+    "click>=8.1.0",
+    "pydantic>=2.0.0",
+    "python-docx>=1.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+    "black>=23.0.0",
+    "ruff>=0.0.292",
+    "mypy>=1.5.0",
+]
+
+[project.scripts]
+report-gen = "report_template.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/yourusername/report-template"
+Documentation = "https://github.com/yourusername/report-template#readme"
+Repository = "https://github.com/yourusername/report-template"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+report_template = ["templates/*.j2", "templates/**/*.j2"]
+
+[tool.black]
+line-length = 100
+target-version = ['py38']
+
+[tool.ruff]
+line-length = 100
+target-version = "py38"
+
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+python_classes = "Test*"
+python_functions = "test_*"

@@ -1,0 +1,105 @@
+title: "Feature Development Report"
+project_name: "My Project"
+author: "John Doe"
+feature_name: "User Authentication"
+repository: "https://github.com/org/repo"
+branch: "feature/auth"
+sprint: "Sprint 5"
+summary: "Implementation of user authentication system with OAuth2 support."
+
+team_members:
+  - name: "John Doe"
+    role: "Lead Developer"
+    email: "john@example.com"
+  - name: "Jane Smith"
+    role: "Backend Developer"
+    email: "jane@example.com"
+
+objectives:
+  - "Implement secure user authentication"
+  - "Support OAuth2 providers (Google, GitHub)"
+  - "Add session management"
+
+requirements:
+  - "Password must be at least 12 characters"
+  - "Support multi-factor authentication"
+  - "Implement rate limiting"
+
+technical_approach: |
+  Using FastAPI for backend, JWT for tokens, and Redis for session storage.
+
+  Key components:
+  - OAuth2 client library (Authlib)
+  - Redis for session management
+  - PostgreSQL for user data
+
+architecture_notes: |
+  Microservices architecture with separate auth service and user service.
+  API Gateway handles routing and token validation.
+
+tasks:
+  - title: "Design authentication flow"
+    assignee: "John Doe"
+    status: "Completed"
+    priority: "High"
+  - title: "Implement OAuth2 integration"
+    assignee: "Jane Smith"
+    status: "In Progress"
+    priority: "High"
+    due_date: "2024-11-01"
+  - title: "Add rate limiting"
+    assignee: "John Doe"
+    status: "Not Started"
+    priority: "Medium"
+
+milestones:
+  - name: "MVP Release"
+    target_date: "2024-11-15"
+    status: "In Progress"
+    completion_percentage: 60
+    description: "Basic authentication with Google OAuth"
+  - name: "Full Release"
+    target_date: "2024-12-01"
+    status: "Not Started"
+    completion_percentage: 0
+    description: "All providers supported, MFA enabled"
+
+testing_strategy: |
+  - Unit tests for auth logic (pytest)
+  - Integration tests for OAuth flow
+  - Security testing (OWASP Top 10)
+  - Load testing with 1000 concurrent users
+
+deployment_plan: |
+  1. Deploy to staging environment
+  2. QA validation (3 days)
+  3. Rolling deployment to production
+  4. Monitor for 48 hours
+
+risks:
+  - description: "OAuth provider downtime"
+    impact: "High"
+    likelihood: "Low"
+    mitigation: "Implement fallback to local authentication"
+    owner: "John Doe"
+  - description: "Security vulnerabilities"
+    impact: "Critical"
+    likelihood: "Medium"
+    mitigation: "Security audit and penetration testing"
+    owner: "Security Team"
+
+dependencies:
+  - "Redis cluster setup"
+  - "OAuth app registration with providers"
+  - "SSL certificates"
+
+progress_notes: |
+  Week 1: Completed design and setup
+  Week 2: OAuth integration in progress
+
+  Blockers: Waiting for Microsoft OAuth app approval
+
+custom_fields:
+  estimated_effort: "3 weeks"
+  tech_stack: "FastAPI, Redis, PostgreSQL"
+  compliance: "GDPR compliant"
