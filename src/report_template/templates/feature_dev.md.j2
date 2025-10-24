@@ -1,0 +1,164 @@
+# {{ title }}
+
+**Project:** {{ project_name }}
+**Feature:** {{ feature_name }}
+**Author:** {{ author }}
+**Date:** {{ date|date }}
+**Version:** {{ version }}
+
+{% if repository %}**Repository:** {{ repository }}{% endif %}
+{% if branch %}**Branch:** {{ branch }}{% endif %}
+{% if sprint %}**Sprint:** {{ sprint }}{% endif %}
+
+---
+
+## Executive Summary
+
+{{ summary }}
+
+---
+
+## Team
+
+{% if team_members %}
+| Name | Role | Email |
+|------|------|-------|
+{% for member in team_members %}
+| {{ member.name }} | {{ member.role }} | {{ member.email or 'N/A' }} |
+{% endfor %}
+{% else %}
+No team members specified.
+{% endif %}
+
+---
+
+## Objectives
+
+{% if objectives %}
+{% for objective in objectives %}
+- {{ objective }}
+{% endfor %}
+{% else %}
+No objectives specified.
+{% endif %}
+
+---
+
+## Requirements
+
+{% if requirements %}
+{% for req in requirements %}
+- {{ req }}
+{% endfor %}
+{% else %}
+No requirements specified.
+{% endif %}
+
+---
+
+## Technical Approach
+
+{{ technical_approach or 'To be determined.' }}
+
+{% if architecture_notes %}
+### Architecture Notes
+
+{{ architecture_notes }}
+{% endif %}
+
+---
+
+## Tasks & Progress
+
+{% if tasks %}
+| Task | Assignee | Status | Priority | Due Date |
+|------|----------|--------|----------|----------|
+{% for task in tasks %}
+| {{ task.title }} | {{ task.assignee or 'Unassigned' }} | **{{ task.status.value }}** | {{ task.priority.value }} | {{ task.due_date|date if task.due_date else 'N/A' }} |
+{% endfor %}
+{% else %}
+No tasks defined.
+{% endif %}
+
+{% if progress_notes %}
+### Progress Notes
+
+{{ progress_notes }}
+{% endif %}
+
+---
+
+## Milestones
+
+{% if milestones %}
+| Milestone | Target Date | Status | Completion |
+|-----------|-------------|--------|------------|
+{% for milestone in milestones %}
+| {{ milestone.name }} | {{ milestone.target_date|date }} | {{ milestone.status.value }} | {{ milestone.completion_percentage }}% |
+{% endfor %}
+
+{% for milestone in milestones %}
+{% if milestone.description %}
+### {{ milestone.name }}
+{{ milestone.description }}
+{% endif %}
+{% endfor %}
+{% else %}
+No milestones defined.
+{% endif %}
+
+---
+
+## Testing Strategy
+
+{{ testing_strategy or 'To be defined.' }}
+
+---
+
+## Deployment Plan
+
+{{ deployment_plan or 'To be defined.' }}
+
+---
+
+## Risks & Mitigation
+
+{% if risks %}
+{% for risk in risks %}
+### {{ loop.index }}. {{ risk.description }}
+
+- **Impact:** {{ risk.impact.value }}
+- **Likelihood:** {{ risk.likelihood.value }}
+- **Mitigation:** {{ risk.mitigation }}
+{% if risk.owner %}- **Owner:** {{ risk.owner }}{% endif %}
+
+{% endfor %}
+{% else %}
+No risks identified.
+{% endif %}
+
+---
+
+## Dependencies
+
+{% if dependencies %}
+{% for dep in dependencies %}
+- {{ dep }}
+{% endfor %}
+{% else %}
+No dependencies identified.
+{% endif %}
+
+---
+
+## Additional Notes
+
+{% if custom_fields %}
+{% for key, value in custom_fields.items() %}
+**{{ key }}:** {{ value }}
+{% endfor %}
+{% endif %}
+
+---
+
+*Generated on {{ date|date }}*

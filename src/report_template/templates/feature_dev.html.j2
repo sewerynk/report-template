@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+        }
+        h2 {
+            color: #34495e;
+            border-bottom: 2px solid #95a5a6;
+            padding-bottom: 10px;
+            margin-top: 40px;
+            margin-bottom: 20px;
+        }
+        h3 {
+            color: #546e7a;
+            margin-top: 25px;
+            margin-bottom: 15px;
+        }
+        .metadata {
+            background-color: #ecf0f1;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 30px;
+        }
+        .metadata p {
+            margin: 5px 0;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #3498db;
+            color: white;
+            font-weight: bold;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        ul, ol {
+            margin: 15px 0;
+            padding-left: 30px;
+        }
+        li {
+            margin: 8px 0;
+        }
+        .status-completed { color: #27ae60; font-weight: bold; }
+        .status-in-progress { color: #f39c12; font-weight: bold; }
+        .status-blocked { color: #e74c3c; font-weight: bold; }
+        .priority-high, .priority-critical { color: #e74c3c; font-weight: bold; }
+        .priority-medium { color: #f39c12; }
+        .priority-low { color: #95a5a6; }
+        .risk-box {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        hr {
+            border: none;
+            border-top: 1px solid #ddd;
+            margin: 30px 0;
+        }
+        .footer {
+            text-align: center;
+            color: #7f8c8d;
+            font-style: italic;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>{{ title }}</h1>
+
+        <div class="metadata">
+            <p><strong>Project:</strong> {{ project_name }}</p>
+            <p><strong>Feature:</strong> {{ feature_name }}</p>
+            <p><strong>Author:</strong> {{ author }}</p>
+            <p><strong>Date:</strong> {{ date|date }}</p>
+            <p><strong>Version:</strong> {{ version }}</p>
+            {% if repository %}<p><strong>Repository:</strong> {{ repository }}</p>{% endif %}
+            {% if branch %}<p><strong>Branch:</strong> {{ branch }}</p>{% endif %}
+            {% if sprint %}<p><strong>Sprint:</strong> {{ sprint }}</p>{% endif %}
+        </div>
+
+        <h2>Executive Summary</h2>
+        <p>{{ summary }}</p>
+
+        <h2>Team</h2>
+        {% if team_members %}
+        <table>
+            <tr>
+                <th>Name</th>
+                <th>Role</th>
+                <th>Email</th>
+            </tr>
+            {% for member in team_members %}
+            <tr>
+                <td>{{ member.name }}</td>
+                <td>{{ member.role }}</td>
+                <td>{{ member.email or 'N/A' }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+        {% else %}
+        <p>No team members specified.</p>
+        {% endif %}
+
+        <h2>Objectives</h2>
+        {% if objectives %}
+        <ul>
+            {% for objective in objectives %}
+            <li>{{ objective }}</li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p>No objectives specified.</p>
+        {% endif %}
+
+        <h2>Requirements</h2>
+        {% if requirements %}
+        <ul>
+            {% for req in requirements %}
+            <li>{{ req }}</li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p>No requirements specified.</p>
+        {% endif %}
+
+        <h2>Technical Approach</h2>
+        <p>{{ technical_approach or 'To be determined.' }}</p>
+        {% if architecture_notes %}
+        <h3>Architecture Notes</h3>
+        <p>{{ architecture_notes }}</p>
+        {% endif %}
+
+        <h2>Tasks & Progress</h2>
+        {% if tasks %}
+        <table>
+            <tr>
+                <th>Task</th>
+                <th>Assignee</th>
+                <th>Status</th>
+                <th>Priority</th>
+                <th>Due Date</th>
+            </tr>
+            {% for task in tasks %}
+            <tr>
+                <td>{{ task.title }}</td>
+                <td>{{ task.assignee or 'Unassigned' }}</td>
+                <td class="status-{{ task.status.value|lower|replace(' ', '-') }}">{{ task.status.value }}</td>
+                <td class="priority-{{ task.priority.value|lower }}">{{ task.priority.value }}</td>
+                <td>{{ task.due_date|date if task.due_date else 'N/A' }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+        {% else %}
+        <p>No tasks defined.</p>
+        {% endif %}
+
+        {% if progress_notes %}
+        <h3>Progress Notes</h3>
+        <p>{{ progress_notes }}</p>
+        {% endif %}
+
+        <h2>Milestones</h2>
+        {% if milestones %}
+        <table>
+            <tr>
+                <th>Milestone</th>
+                <th>Target Date</th>
+                <th>Status</th>
+                <th>Completion</th>
+            </tr>
+            {% for milestone in milestones %}
+            <tr>
+                <td>{{ milestone.name }}</td>
+                <td>{{ milestone.target_date|date }}</td>
+                <td class="status-{{ milestone.status.value|lower|replace(' ', '-') }}">{{ milestone.status.value }}</td>
+                <td>{{ milestone.completion_percentage }}%</td>
+            </tr>
+            {% endfor %}
+        </table>
+        {% else %}
+        <p>No milestones defined.</p>
+        {% endif %}
+
+        <h2>Testing Strategy</h2>
+        <p>{{ testing_strategy or 'To be defined.' }}</p>
+
+        <h2>Deployment Plan</h2>
+        <p>{{ deployment_plan or 'To be defined.' }}</p>
+
+        <h2>Risks & Mitigation</h2>
+        {% if risks %}
+        {% for risk in risks %}
+        <div class="risk-box">
+            <h3>{{ loop.index }}. {{ risk.description }}</h3>
+            <p><strong>Impact:</strong> <span class="priority-{{ risk.impact.value|lower }}">{{ risk.impact.value }}</span></p>
+            <p><strong>Likelihood:</strong> <span class="priority-{{ risk.likelihood.value|lower }}">{{ risk.likelihood.value }}</span></p>
+            <p><strong>Mitigation:</strong> {{ risk.mitigation }}</p>
+            {% if risk.owner %}<p><strong>Owner:</strong> {{ risk.owner }}</p>{% endif %}
+        </div>
+        {% endfor %}
+        {% else %}
+        <p>No risks identified.</p>
+        {% endif %}
+
+        <h2>Dependencies</h2>
+        {% if dependencies %}
+        <ul>
+            {% for dep in dependencies %}
+            <li>{{ dep }}</li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p>No dependencies identified.</p>
+        {% endif %}
+
+        <div class="footer">
+            <p>Generated on {{ date|date }}</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,161 @@
+# {{ title }}
+
+**Program:** {{ program_name }}
+**Author:** {{ author }}
+**Reporting Period:** {{ reporting_period }}
+**Date:** {{ date|date }}
+**Version:** {{ version }}
+**Status:** **{{ status.value }}**
+
+---
+
+## Executive Summary
+
+{{ executive_summary }}
+
+### Overall Summary
+
+{{ summary }}
+
+---
+
+## Stakeholders
+
+{% if stakeholders %}
+{% for stakeholder in stakeholders %}
+- {{ stakeholder }}
+{% endfor %}
+{% else %}
+No stakeholders specified.
+{% endif %}
+
+---
+
+## Team Composition
+
+{% if team_members %}
+| Name | Role | Email |
+|------|------|-------|
+{% for member in team_members %}
+| {{ member.name }} | {{ member.role }} | {{ member.email or 'N/A' }} |
+{% endfor %}
+{% else %}
+No team members specified.
+{% endif %}
+
+---
+
+## Key Performance Indicators (KPIs)
+
+{% if kpis %}
+| Metric | Value |
+|--------|-------|
+{% for metric, value in kpis.items() %}
+| {{ metric }} | {{ value }} |
+{% endfor %}
+{% else %}
+No KPIs defined.
+{% endif %}
+
+---
+
+## Milestones & Progress
+
+{% if milestones %}
+| Milestone | Target Date | Status | Completion |
+|-----------|-------------|--------|------------|
+{% for milestone in milestones %}
+| {{ milestone.name }} | {{ milestone.target_date|date }} | {{ milestone.status.value }} | {{ milestone.completion_percentage }}% |
+{% endfor %}
+
+{% for milestone in milestones %}
+{% if milestone.description %}
+### {{ milestone.name }}
+{{ milestone.description }}
+{% endif %}
+{% endfor %}
+{% else %}
+No milestones defined.
+{% endif %}
+
+---
+
+## Key Achievements
+
+{% if key_achievements %}
+{% for achievement in key_achievements %}
+- {{ achievement }}
+{% endfor %}
+{% else %}
+No achievements to report.
+{% endif %}
+
+---
+
+## Challenges
+
+{% if challenges %}
+{% for challenge in challenges %}
+- {{ challenge }}
+{% endfor %}
+{% else %}
+No challenges identified.
+{% endif %}
+
+---
+
+## Risks
+
+{% if risks %}
+| Risk | Impact | Likelihood | Mitigation | Owner |
+|------|--------|------------|------------|-------|
+{% for risk in risks %}
+| {{ risk.description }} | {{ risk.impact.value }} | {{ risk.likelihood.value }} | {{ risk.mitigation }} | {{ risk.owner or 'N/A' }} |
+{% endfor %}
+{% else %}
+No risks identified.
+{% endif %}
+
+---
+
+## Budget Summary
+
+{{ budget_summary or 'No budget information provided.' }}
+
+---
+
+## Upcoming Activities
+
+{% if upcoming_activities %}
+{% for activity in upcoming_activities %}
+- {{ activity }}
+{% endfor %}
+{% else %}
+No upcoming activities specified.
+{% endif %}
+
+---
+
+## Decisions Needed
+
+{% if decisions_needed %}
+{% for decision in decisions_needed %}
+- {{ decision }}
+{% endfor %}
+{% else %}
+No decisions pending.
+{% endif %}
+
+---
+
+## Additional Information
+
+{% if custom_fields %}
+{% for key, value in custom_fields.items() %}
+**{{ key }}:** {{ value }}
+{% endfor %}
+{% endif %}
+
+---
+
+*Report generated on {{ date|date }}*
