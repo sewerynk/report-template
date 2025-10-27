@@ -71,10 +71,10 @@ No requirements specified.
 ## Tasks & Progress
 
 {% if tasks %}
-| Task | Assignee | Status | Priority | Due Date |
-|------|----------|--------|----------|----------|
+| Task | Assignee | Status | Priority | JIRA | Start Date | End Date | Due Date |
+|------|----------|--------|----------|------|------------|----------|----------|
 {% for task in tasks %}
-| {{ task.title }} | {{ task.assignee or 'Unassigned' }} | **{{ task.status.value }}** | {{ task.priority.value }} | {{ task.due_date|date if task.due_date else 'N/A' }} |
+| {{ task.title }} | {{ task.assignee or 'Unassigned' }} | **{{ task.status.value }}** | {{ task.priority.value }} | {{ task.jira_id or 'N/A' }} | {{ task.target_start_date|date if task.target_start_date else 'N/A' }} | {{ task.target_end_date|date if task.target_end_date else 'N/A' }} | {{ task.due_date|date if task.due_date else 'N/A' }} |
 {% endfor %}
 {% else %}
 No tasks defined.
