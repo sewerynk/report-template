@@ -2,6 +2,8 @@
 Data models for different report types using Pydantic for validation.
 """
 
+from __future__ import annotations
+
 from datetime import date, datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional
