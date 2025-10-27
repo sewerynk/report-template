@@ -2,7 +2,9 @@
 Data models for different report types using Pydantic for validation.
 """
 
-from datetime import date, datetime
+from __future__ import annotations
+
+from datetime import date as date_type, datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
@@ -49,7 +51,7 @@ class Milestone(BaseModel):
     """Represents a project milestone."""
 
     name: str
-    target_date: date
+    target_date: date_type
     status: Status
     completion_percentage: int = Field(ge=0, le=100, default=0)
     description: Optional[str] = None
@@ -62,7 +64,7 @@ class Task(BaseModel):
     assignee: Optional[str] = None
     status: Status
     priority: Priority = Priority.MEDIUM
-    due_date: Optional[date] = None
+    due_date: Optional[date_type] = None
     description: Optional[str] = None
     tags: List[str] = Field(default_factory=list)
 
@@ -91,16 +93,16 @@ class ReportData(BaseModel):
     title: str
     project_name: str
     author: str
-    date: date = Field(default_factory=date.today)
+    date: date_type = Field(default_factory=date_type.today)
     version: str = "1.0"
     summary: str
     custom_fields: Dict[str, Any] = Field(default_factory=dict)
 
     @field_validator("date", mode="before")
     @classmethod
-    def parse_date(cls, v: Any) -> date:
+    def parse_date(cls, v: Any) -> date_type:
         """Parse date from various formats."""
-        if isinstance(v, date):
+        if isinstance(v, date_type):
             return v
         if isinstance(v, datetime):
             return v.date()
@@ -156,8 +158,8 @@ class EngineeringInitReport(ReportData):
     initiative_type: str  # e.g., "Infrastructure", "Architecture", "Process Improvement"
     sponsors: List[str] = Field(default_factory=list)
     team_members: List[TeamMember] = Field(default_factory=list)
-    start_date: Optional[date] = None
-    target_completion_date: Optional[date] = None
+    start_date: Optional[date_type] = None
+    target_completion_date: Optional[date_type] = None
     status: Status
     objectives: List[str] = Field(default_factory=list)
     scope: str = ""
