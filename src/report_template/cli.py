@@ -467,7 +467,7 @@ def sync_jira(data_file: str, config: str, output: Optional[str]) -> None:
 
 
 @main.command()
-@click.argument("jql_query")
+@click.argument("jira_ids", nargs=-1, required=True)
 @click.option(
     "--config",
     type=click.Path(exists=True),
@@ -481,43 +481,26 @@ def sync_jira(data_file: str, config: str, output: Optional[str]) -> None:
     required=True,
     help="Output file path for fetched tasks",
 )
-@click.option(
-    "--max-results",
-    type=int,
-    default=50,
-    help="Maximum number of issues to fetch",
-)
-def fetch_jira(jql_query: str, config: str, output: str, max_results: int) -> None:
+def fetch_tickets(jira_ids: tuple, config: str, output: str) -> None:
     """
-    Fetch tasks from JIRA using JQL query.
+    Fetch tasks from JIRA using ticket IDs (simpler than JQL queries).
 
-    Creates a new data file with tasks fetched from JIRA.
-    You can copy the exact JQL from JIRA's "Filters → Advanced" search!
-
-    How to get your JQL:
-    1. Go to JIRA web interface
-    2. Click "Filters" → "Advanced issue search"
-    3. Build your filter with the visual editor or write JQL
-    4. Copy the JQL query shown at the top
-    5. Paste it into this command
+    This is the easiest way to create a report from JIRA tickets.
+    Just provide the ticket IDs and all data will be fetched automatically.
 
     Examples:
 
     \b
-    # Using JQL copied from JIRA filter
-    report-gen fetch-jira 'project = "DCM Automation" AND status = "In Progress"' -o tasks.yaml
+    # Fetch specific tickets
+    report-gen fetch-tickets PROJ-123 PROJ-124 PROJ-125 -o tasks.yaml
 
     \b
-    # Fetch tasks from current sprint
-    report-gen fetch-jira "project = MYPROJ AND sprint in openSprints()" -o tasks.yaml
+    # Fetch tickets for your report
+    report-gen fetch-tickets AUTH-101 AUTH-102 AUTH-103 -o feature_report.yaml
 
     \b
-    # Fetch high priority bugs
-    report-gen fetch-jira "project = MYPROJ AND type = Bug AND priority = High" -o bugs.yaml
-
-    \b
-    # Using text search (like JIRA's search box)
-    report-gen fetch-jira "text ~ 'automation' AND project = DCMA" -o tasks.yaml
+    # Then generate the report
+    report-gen generate feature_report.yaml -t feature_dev -o report.docx
     """
     try:
         from report_template.jira_client import create_jira_client
@@ -543,22 +526,24 @@ def fetch_jira(jql_query: str, config: str, output: str, max_results: int) -> No
             click.echo(f"Error connecting to JIRA: {str(e)}", err=True)
             sys.exit(1)
 
-        # Fetch tasks
-        click.echo(f"\nFetching tasks with JQL: {jql_query}")
-        try:
-            tasks = jira_client.fetch_tasks_by_jql(jql_query, max_results)
-        except Exception as e:
-            click.echo(f"\nError executing JQL query: {str(e)}", err=True)
-            click.echo("\nTip: If your project name has spaces, use the project KEY instead.", err=True)
-            click.echo("Example: project = DCMA (not 'project = DCM Automation')", err=True)
-            click.echo("\nOr quote the project name: project = \"DCM Automation\"", err=True)
-            sys.exit(1)
+        # Fetch each ticket
+        click.echo(f"\nFetching {len(jira_ids)} JIRA tickets...")
+        tasks = []
+
+        for jira_id in jira_ids:
+            try:
+                issue = jira_client.get_issue(jira_id)
+                task_data = jira_client.issue_to_task_data(issue)
+                tasks.append(task_data)
+                click.echo(f"✓ Fetched {jira_id}: {task_data['title']}")
+            except Exception as e:
+                click.echo(f"✗ Failed to fetch {jira_id}: {str(e)}", err=True)
 
         if not tasks:
-            click.echo("No tasks found matching query.")
-            sys.exit(0)
+            click.echo("No tasks fetched successfully.")
+            sys.exit(1)
 
-        click.echo(f"\n✓ Fetched {len(tasks)} tasks from JIRA")
+        click.echo(f"\n✓ Successfully fetched {len(tasks)} tasks from JIRA")
 
         # Create minimal data structure
         data = {
@@ -566,7 +551,7 @@ def fetch_jira(jql_query: str, config: str, output: str, max_results: int) -> No
             'title': 'Report from JIRA',
             'project_name': 'Project',
             'author': 'Auto-generated',
-            'summary': f'Tasks fetched from JIRA using: {jql_query}'
+            'summary': f'Tasks fetched from JIRA tickets: {", ".join(jira_ids)}'
         }
 
         # Save to output file
@@ -579,7 +564,7 @@ def fetch_jira(jql_query: str, config: str, output: str, max_results: int) -> No
 
         click.echo(f"✓ Tasks saved to: {output_path}")
         click.echo(f"\nYou can now generate a report with:")
-        click.echo(f"  report-gen generate {output_path} -t feature_dev -o report.md")
+        click.echo(f"  report-gen generate {output_path} -t feature_dev -o report.docx")
 
     except ImportError:
         click.echo(

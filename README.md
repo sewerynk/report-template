@@ -144,26 +144,37 @@ The DOCX format is ideal for:
 
 ## JIRA Integration
 
-Automatically fetch and sync task data from your JIRA server:
+Automatically fetch task data from your JIRA server!
+
+### Quick Start with JIRA
 
 ```bash
-# Setup JIRA configuration
+# 1. Setup JIRA configuration (one-time setup)
 cp .jira.config.example.yaml .jira.config.yaml
 # Edit with your JIRA URL, username, and API token
 
-# Fetch tasks from JIRA using JQL
-report-gen fetch-jira "project = MYPROJ AND sprint in openSprints()" -o tasks.yaml
+# 2. Fetch tasks by ticket IDs
+report-gen fetch-tickets PROJ-123 PROJ-124 PROJ-125 -o tasks.yaml
 
-# Sync existing tasks with JIRA
-report-gen sync-jira feature_data.yaml
-
-# Generate report with live JIRA data
+# 3. Generate report with JIRA data
 report-gen generate tasks.yaml -t feature_dev -o report.docx
 ```
 
-**What gets synced:**
-- Task status, priority, and assignee
-- Due dates and descriptions
+**That's it!** All task data (title, status, assignee, dates, etc.) is automatically fetched from JIRA.
+
+### Sync Existing Tasks
+
+You can also sync existing data files with JIRA to update task information:
+
+```bash
+# Update tasks that have jira_id field
+report-gen sync-jira feature_data.yaml
+```
+
+**What gets fetched:**
+- Task title, description
+- Status, priority, and assignee
+- Due dates and target dates
 - JIRA ticket IDs and labels
 
 See the [JIRA Integration Guide](docs/jira-integration.md) for detailed setup and usage.
@@ -268,6 +279,25 @@ Options:
   -t, --type    Report type
   -o, --output  Output file path
   -f, --format  Data format (yaml, json) [default: yaml]
+```
+
+### Fetch Tasks from JIRA by Ticket IDs
+
+```bash
+report-gen fetch-tickets <JIRA-ID> [<JIRA-ID> ...] -o <output>
+
+Examples:
+  report-gen fetch-tickets PROJ-123 PROJ-124 -o tasks.yaml
+  report-gen fetch-tickets AUTH-101 AUTH-102 AUTH-103 -o feature.yaml
+```
+
+### Sync Existing Data with JIRA
+
+```bash
+report-gen sync-jira <data-file>
+
+Example:
+  report-gen sync-jira my_feature.yaml
 ```
 
 ### List Templates
