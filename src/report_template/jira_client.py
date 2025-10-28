@@ -4,43 +4,32 @@ JIRA integration module for fetching task data from JIRA server.
 
 from datetime import datetime
 from typing import Any, Dict, List, Optional
-
-try:
-    from atlassian import Jira
-    JIRA_AVAILABLE = True
-except ImportError:
-    JIRA_AVAILABLE = False
+import requests
 
 from report_template.models import Priority, Status
 
 
 class JiraClient:
-    """Client for interacting with JIRA API."""
+    """Client for interacting with JIRA API using Personal Access Token (PAT)."""
 
-    def __init__(self, url: str, username: str, api_token: str):
+    def __init__(self, url: str, api_token: str):
         """
-        Initialize JIRA client.
+        Initialize JIRA client with Personal Access Token.
 
         Args:
-            url: JIRA server URL (e.g., 'https://your-domain.atlassian.net')
-            username: JIRA username/email
-            api_token: JIRA API token
+            url: JIRA server URL (e.g., 'https://jiradc.ext.net.nokia.com')
+            api_token: JIRA Personal Access Token (PAT)
 
-        Raises:
-            ImportError: If atlassian-python-api is not installed
+        Note:
+            This client uses Bearer token authentication with PAT.
+            Basic authentication is not supported.
         """
-        if not JIRA_AVAILABLE:
-            raise ImportError(
-                "atlassian-python-api is required for JIRA integration. "
-                "Install it with: pip install atlassian-python-api"
-            )
-
-        self.jira = Jira(
-            url=url,
-            username=username,
-            password=api_token,
-            cloud=True
-        )
+        self.url = url.rstrip('/')
+        self.headers = {
+            "Authorization": f"Bearer {api_token}",
+            "Accept": "application/json",
+            "Content-Type": "application/json"
+        }
 
     def get_issue(self, issue_key: str) -> Dict[str, Any]:
         """
@@ -55,8 +44,24 @@ class JiraClient:
         Raises:
             Exception: If issue not found or API error
         """
-        issue = self.jira.issue(issue_key)
-        return issue
+        api_url = f"{self.url}/rest/api/2/issue/{issue_key}?fields=*all"
+
+        try:
+            response = requests.get(api_url, headers=self.headers, timeout=30)
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.HTTPError as e:
+            if e.response.status_code == 403:
+                raise Exception(
+                    f"Access denied to JIRA issue {issue_key}. "
+                    "Check your Personal Access Token (PAT) permissions."
+                ) from e
+            elif e.response.status_code == 404:
+                raise Exception(f"JIRA issue {issue_key} not found.") from e
+            else:
+                raise Exception(f"Failed to fetch JIRA issue {issue_key}: {str(e)}") from e
+        except requests.exceptions.RequestException as e:
+            raise Exception(f"Failed to connect to JIRA: {str(e)}") from e
 
     def issue_to_task_data(self, issue: Dict[str, Any]) -> Dict[str, Any]:
         """
@@ -243,7 +248,8 @@ def create_jira_client(config: Dict[str, str]) -> JiraClient:
     Create JIRA client from configuration dictionary.
 
     Args:
-        config: Dictionary with 'url', 'username', 'api_token' keys
+        config: Dictionary with 'url' and 'api_token' keys
+                'api_token' should be a Personal Access Token (PAT)
 
     Returns:
         JiraClient instance
@@ -251,7 +257,7 @@ def create_jira_client(config: Dict[str, str]) -> JiraClient:
     Raises:
         ValueError: If required config keys are missing
     """
-    required_keys = ['url', 'username', 'api_token']
+    required_keys = ['url', 'api_token']
     missing_keys = [key for key in required_keys if key not in config]
 
     if missing_keys:
@@ -259,6 +265,5 @@ def create_jira_client(config: Dict[str, str]) -> JiraClient:
 
     return JiraClient(
         url=config['url'],
-        username=config['username'],
         api_token=config['api_token']
     )
