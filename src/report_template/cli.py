@@ -494,6 +494,12 @@ def fetch_jira(jql_query: str, config: str, output: str, max_results: int) -> No
     Creates a new data file with tasks fetched from JIRA.
     You can copy the exact JQL from JIRA's "Filters → Advanced" search!
 
+    Supports complex JQL including:
+    - Custom fields: cf[29790] in (4907, 4908)
+    - Date functions: worklogDate >= startOfWeek(-2)
+    - Multiple conditions with AND/OR operators
+    - Fields with special characters: "Σ Logged Effort (h)" > 0
+
     How to get your JQL:
     1. Go to JIRA web interface
     2. Click "Filters" → "Advanced issue search"
@@ -504,20 +510,20 @@ def fetch_jira(jql_query: str, config: str, output: str, max_results: int) -> No
     Examples:
 
     \b
-    # Using JQL copied from JIRA filter
+    # Simple project filter
     report-gen fetch-jira 'project = "DCM Automation" AND status = "In Progress"' -o tasks.yaml
+
+    \b
+    # Complex query with custom fields and date functions
+    report-gen fetch-jira 'type in (Epic) AND cf[29790] in (4907, 4908) AND worklogDate >= startOfWeek(-2)' -o tasks.yaml
 
     \b
     # Fetch tasks from current sprint
     report-gen fetch-jira "project = MYPROJ AND sprint in openSprints()" -o tasks.yaml
 
     \b
-    # Fetch high priority bugs
-    report-gen fetch-jira "project = MYPROJ AND type = Bug AND priority = High" -o bugs.yaml
-
-    \b
-    # Using text search (like JIRA's search box)
-    report-gen fetch-jira "text ~ 'automation' AND project = DCMA" -o tasks.yaml
+    # Using custom field with special characters
+    report-gen fetch-jira 'project = MYPROJ AND "Σ Logged Effort (h)" > 0' -o tasks.yaml
     """
     try:
         from report_template.jira_client import create_jira_client

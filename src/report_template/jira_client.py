@@ -64,6 +64,8 @@ class JiraClient:
 
         Args:
             jql: JQL query string (same as you'd use in JIRA's issue filter)
+                 Supports complex queries with custom fields, date functions, etc.
+                 Example: 'type in (Epic) AND cf[29790] in (4907, 4908) AND worklogDate >= startOfWeek(-2)'
             max_results: Maximum number of results to return
 
         Returns:
@@ -73,26 +75,38 @@ class JiraClient:
             Exception: If JQL query is invalid or API error occurs
         """
         try:
-            # Use search_issues which is more robust and matches JIRA's search
-            issues = self.jira.jql(
+            # Use jql() method which properly handles complex queries with custom fields
+            result = self.jira.jql(
                 jql,
                 limit=max_results,
-                fields='*all'  # Get all fields including custom fields
+                fields='*all'  # Get all fields including custom fields like cf[29790]
             )
-            return issues.get('issues', []) if isinstance(issues, dict) else []
+
+            # Handle both response formats
+            if isinstance(result, dict):
+                return result.get('issues', [])
+            elif isinstance(result, list):
+                return result
+            else:
+                return []
+
         except Exception as e:
             # Provide more helpful error message
             error_msg = str(e)
             if not error_msg:
                 error_msg = f"Unknown error executing JQL query: {jql}"
 
-            # Provide helpful hints
+            # Provide helpful hints based on common issues
+            hints = []
             if "project" in jql.lower() and " " in jql:
-                hint = "\n\nTip: Project names with spaces need quotes: project = \"My Project\""
-            else:
-                hint = "\n\nTip: Test your JQL in JIRA's issue search (Filters → Advanced) first"
+                hints.append("Project names with spaces need quotes: project = \"My Project\"")
+            if "cf[" in jql:
+                hints.append("Make sure custom field IDs (cf[xxxxx]) match your JIRA instance")
+            if not hints:
+                hints.append("Test your JQL in JIRA's issue search (Filters → Advanced) first")
 
-            raise Exception(f"JQL query failed: {error_msg}{hint}") from e
+            hint_text = "\n\nTips:\n- " + "\n- ".join(hints)
+            raise Exception(f"JQL query failed: {error_msg}{hint_text}") from e
 
     def issue_to_task_data(self, issue: Dict[str, Any]) -> Dict[str, Any]:
         """
