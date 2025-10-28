@@ -492,8 +492,20 @@ def fetch_jira(jql_query: str, config: str, output: str, max_results: int) -> No
     Fetch tasks from JIRA using JQL query.
 
     Creates a new data file with tasks fetched from JIRA.
+    You can copy the exact JQL from JIRA's "Filters → Advanced" search!
+
+    How to get your JQL:
+    1. Go to JIRA web interface
+    2. Click "Filters" → "Advanced issue search"
+    3. Build your filter with the visual editor or write JQL
+    4. Copy the JQL query shown at the top
+    5. Paste it into this command
 
     Examples:
+
+    \b
+    # Using JQL copied from JIRA filter
+    report-gen fetch-jira 'project = "DCM Automation" AND status = "In Progress"' -o tasks.yaml
 
     \b
     # Fetch tasks from current sprint
@@ -504,8 +516,8 @@ def fetch_jira(jql_query: str, config: str, output: str, max_results: int) -> No
     report-gen fetch-jira "project = MYPROJ AND type = Bug AND priority = High" -o bugs.yaml
 
     \b
-    # Limit number of results
-    report-gen fetch-jira "project = MYPROJ" -o tasks.yaml --max-results 20
+    # Using text search (like JIRA's search box)
+    report-gen fetch-jira "text ~ 'automation' AND project = DCMA" -o tasks.yaml
     """
     try:
         from report_template.jira_client import create_jira_client
