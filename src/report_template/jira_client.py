@@ -68,9 +68,19 @@ class JiraClient:
 
         Returns:
             List of issue dictionaries
+
+        Raises:
+            Exception: If JQL query is invalid or API error occurs
         """
-        result = self.jira.jql(jql, limit=max_results)
-        return result.get('issues', [])
+        try:
+            result = self.jira.jql(jql, limit=max_results)
+            return result.get('issues', [])
+        except Exception as e:
+            # Provide more helpful error message
+            error_msg = str(e)
+            if not error_msg:
+                error_msg = f"Unknown error executing JQL query: {jql}"
+            raise Exception(f"JQL query failed: {error_msg}") from e
 
     def issue_to_task_data(self, issue: Dict[str, Any]) -> Dict[str, Any]:
         """
