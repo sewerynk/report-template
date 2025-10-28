@@ -205,3 +205,7 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# JIRA configuration (contains sensitive API tokens)
+.jira.config.yaml
+.jira.config.yml

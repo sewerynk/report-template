@@ -1,0 +1,23 @@
+# JIRA Configuration File Example
+# Copy this file to .jira.config.yaml and fill in your details
+# This file should be added to .gitignore for security
+
+jira:
+  # Your JIRA server URL (for cloud: https://your-domain.atlassian.net)
+  url: "https://your-domain.atlassian.net"
+
+  # Your JIRA username/email
+  username: "your-email@example.com"
+
+  # JIRA API token
+  # Generate one at: https://id.atlassian.com/manage-profile/security/api-tokens
+  api_token: "your-api-token-here"
+
+# Optional: Default JQL query for fetching tasks
+default_jql: "project = MYPROJECT AND sprint in openSprints()"
+
+# Optional: Field mappings for custom JIRA fields
+# Uncomment and adjust based on your JIRA instance
+# field_mappings:
+#   target_start_date: "customfield_10015"
+#   target_end_date: "customfield_10016"

@@ -6,6 +6,7 @@ A Python-based solution for generating standardized, professional project report
 
 - **Multiple Report Types**: Feature development, program management, and engineering initiatives
 - **Flexible Output Formats**: Markdown, HTML, PDF, and Word (DOCX) support
+- **JIRA Integration**: Automatically fetch and sync task data from JIRA server
 - **Template-Based**: Fully customizable Jinja2 templates
 - **CLI & Python API**: Use via command-line or programmatically
 - **Data Validation**: Pydantic models ensure data integrity
@@ -141,6 +142,32 @@ The DOCX format is ideal for:
 - Further editing and customization in Word
 - Corporate environments requiring .docx format
 
+## JIRA Integration
+
+Automatically fetch and sync task data from your JIRA server:
+
+```bash
+# Setup JIRA configuration
+cp .jira.config.example.yaml .jira.config.yaml
+# Edit with your JIRA URL, username, and API token
+
+# Fetch tasks from JIRA using JQL
+report-gen fetch-jira "project = MYPROJ AND sprint in openSprints()" -o tasks.yaml
+
+# Sync existing tasks with JIRA
+report-gen sync-jira feature_data.yaml
+
+# Generate report with live JIRA data
+report-gen generate tasks.yaml -t feature_dev -o report.docx
+```
+
+**What gets synced:**
+- Task status, priority, and assignee
+- Due dates and descriptions
+- JIRA ticket IDs and labels
+
+See the [JIRA Integration Guide](docs/jira-integration.md) for detailed setup and usage.
+
 ## Python API
 
 Use programmatically in your Python code:
@@ -266,6 +293,7 @@ python feature_dev_example.py
 ## Documentation
 
 - [Usage Guide](docs/usage.md) - Detailed usage instructions
+- [JIRA Integration Guide](docs/jira-integration.md) - Sync tasks with JIRA server
 - [Customization Guide](docs/customization.md) - Template customization and extensions
 - [API Documentation](docs/api.md) - Python API reference (coming soon)
 
