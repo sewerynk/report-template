@@ -533,7 +533,14 @@ def fetch_jira(jql_query: str, config: str, output: str, max_results: int) -> No
 
         # Fetch tasks
         click.echo(f"\nFetching tasks with JQL: {jql_query}")
-        tasks = jira_client.fetch_tasks_by_jql(jql_query, max_results)
+        try:
+            tasks = jira_client.fetch_tasks_by_jql(jql_query, max_results)
+        except Exception as e:
+            click.echo(f"\nError executing JQL query: {str(e)}", err=True)
+            click.echo("\nTip: If your project name has spaces, use the project KEY instead.", err=True)
+            click.echo("Example: project = DCMA (not 'project = DCM Automation')", err=True)
+            click.echo("\nOr quote the project name: project = \"DCM Automation\"", err=True)
+            sys.exit(1)
 
         if not tasks:
             click.echo("No tasks found matching query.")
