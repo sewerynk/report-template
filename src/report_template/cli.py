@@ -599,5 +599,117 @@ def fetch_jira(jql_query: str, config: str, output: str, max_results: int) -> No
         sys.exit(1)
 
 
+@main.command()
+@click.argument("jira_ids", nargs=-1, required=True)
+@click.option(
+    "--config",
+    type=click.Path(exists=True),
+    default=".jira.config.yaml",
+    help="Path to JIRA configuration file",
+)
+@click.option(
+    "-o",
+    "--output",
+    type=click.Path(),
+    required=True,
+    help="Output file path for fetched tasks",
+)
+def fetch_tickets(jira_ids: tuple, config: str, output: str) -> None:
+    """
+    Fetch tasks from JIRA using ticket IDs (simpler than JQL queries).
+
+    This is the easiest way to create a report from JIRA tickets.
+    Just provide the ticket IDs and all data will be fetched automatically.
+
+    Examples:
+
+    \b
+    # Fetch specific tickets
+    report-gen fetch-tickets PROJ-123 PROJ-124 PROJ-125 -o tasks.yaml
+
+    \b
+    # Fetch tickets for your report
+    report-gen fetch-tickets AUTH-101 AUTH-102 AUTH-103 -o feature_report.yaml
+
+    \b
+    # Then generate the report
+    report-gen generate feature_report.yaml -t feature_dev -o report.docx
+    """
+    try:
+        from report_template.jira_client import create_jira_client
+
+        # Load JIRA config
+        config_path = Path(config)
+        if not config_path.exists():
+            click.echo(
+                f"Error: JIRA config file not found: {config_path}\n"
+                f"Create one from: .jira.config.example.yaml",
+                err=True
+            )
+            sys.exit(1)
+
+        with open(config_path) as f:
+            jira_config = yaml.safe_load(f).get('jira', {})
+
+        # Create JIRA client
+        try:
+            jira_client = create_jira_client(jira_config)
+            click.echo(f"✓ Connected to JIRA: {jira_config['url']}")
+        except Exception as e:
+            click.echo(f"Error connecting to JIRA: {str(e)}", err=True)
+            sys.exit(1)
+
+        # Fetch each ticket
+        click.echo(f"\nFetching {len(jira_ids)} JIRA tickets...")
+        tasks = []
+
+        for jira_id in jira_ids:
+            try:
+                issue = jira_client.get_issue(jira_id)
+                task_data = jira_client.issue_to_task_data(issue)
+                tasks.append(task_data)
+                click.echo(f"✓ Fetched {jira_id}: {task_data['title']}")
+            except Exception as e:
+                click.echo(f"✗ Failed to fetch {jira_id}: {str(e)}", err=True)
+
+        if not tasks:
+            click.echo("No tasks fetched successfully.")
+            sys.exit(1)
+
+        click.echo(f"\n✓ Successfully fetched {len(tasks)} tasks from JIRA")
+
+        # Create minimal data structure
+        data = {
+            'tasks': tasks,
+            'title': 'Report from JIRA',
+            'project_name': 'Project',
+            'author': 'Auto-generated',
+            'summary': f'Tasks fetched from JIRA tickets: {", ".join(jira_ids)}'
+        }
+
+        # Save to output file
+        output_path = Path(output)
+        with open(output_path, 'w') as f:
+            if output_path.suffix in [".yaml", ".yml"]:
+                yaml.dump(data, f, default_flow_style=False, sort_keys=False)
+            else:
+                json.dump(data, f, indent=2, default=str)
+
+        click.echo(f"✓ Tasks saved to: {output_path}")
+        click.echo(f"\nYou can now generate a report with:")
+        click.echo(f"  report-gen generate {output_path} -t feature_dev -o report.docx")
+
+    except ImportError:
+        click.echo(
+            "Error: JIRA integration not available. "
+            "Install with: pip install atlassian-python-api",
+            err=True
+        )
+        sys.exit(1)
+    except Exception as e:
+        click.echo(f"Error: {str(e)}", err=True)
+        sys.exit(1)
+
+
 if __name__ == "__main__":
     main()
