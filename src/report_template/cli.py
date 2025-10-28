@@ -364,5 +364,215 @@ def list_templates(template_dir: Optional[str]) -> None:
         sys.exit(1)
 
 
+@main.command()
+@click.argument("data_file", type=click.Path(exists=True))
+@click.option(
+    "--config",
+    type=click.Path(exists=True),
+    default=".jira.config.yaml",
+    help="Path to JIRA configuration file",
+)
+@click.option(
+    "-o",
+    "--output",
+    type=click.Path(),
+    default=None,
+    help="Output file path (updates input file if not specified)",
+)
+def sync_jira(data_file: str, config: str, output: Optional[str]) -> None:
+    """
+    Sync task data with JIRA server.
+
+    Fetches latest data from JIRA for all tasks that have a jira_id field.
+
+    Examples:
+
+    \b
+    # Sync tasks in place
+    report-gen sync-jira feature_data.yaml
+
+    \b
+    # Sync and save to new file
+    report-gen sync-jira feature_data.yaml -o feature_data_synced.yaml
+
+    \b
+    # Use custom config file
+    report-gen sync-jira feature_data.yaml --config ~/my-jira-config.yaml
+    """
+    try:
+        from report_template.jira_client import create_jira_client
+
+        # Load JIRA config
+        config_path = Path(config)
+        if not config_path.exists():
+            click.echo(
+                f"Error: JIRA config file not found: {config_path}\n"
+                f"Create one from: .jira.config.example.yaml",
+                err=True
+            )
+            sys.exit(1)
+
+        with open(config_path) as f:
+            jira_config = yaml.safe_load(f).get('jira', {})
+
+        # Create JIRA client
+        try:
+            jira_client = create_jira_client(jira_config)
+            click.echo(f"✓ Connected to JIRA: {jira_config['url']}")
+        except Exception as e:
+            click.echo(f"Error connecting to JIRA: {str(e)}", err=True)
+            sys.exit(1)
+
+        # Load data file
+        data_path = Path(data_file)
+        with open(data_path) as f:
+            if data_path.suffix in [".yaml", ".yml"]:
+                data = yaml.safe_load(f)
+            elif data_path.suffix == ".json":
+                data = json.load(f)
+            else:
+                click.echo(f"Error: Unsupported file format '{data_path.suffix}'", err=True)
+                sys.exit(1)
+
+        # Sync tasks
+        tasks = data.get('tasks', [])
+        if not tasks:
+            click.echo("No tasks found in data file.")
+            sys.exit(0)
+
+        click.echo(f"\nSyncing {len(tasks)} tasks...")
+        updated_tasks = jira_client.sync_tasks(tasks)
+        data['tasks'] = updated_tasks
+
+        # Save to output file
+        output_path = Path(output) if output else data_path
+        with open(output_path, 'w') as f:
+            if output_path.suffix in [".yaml", ".yml"]:
+                yaml.dump(data, f, default_flow_style=False, sort_keys=False)
+            else:
+                json.dump(data, f, indent=2, default=str)
+
+        click.echo(f"\n✓ Synced data saved to: {output_path}")
+
+    except ImportError:
+        click.echo(
+            "Error: JIRA integration not available. "
+            "Install with: pip install atlassian-python-api",
+            err=True
+        )
+        sys.exit(1)
+    except Exception as e:
+        click.echo(f"Error: {str(e)}", err=True)
+        sys.exit(1)
+
+
+@main.command()
+@click.argument("jql_query")
+@click.option(
+    "--config",
+    type=click.Path(exists=True),
+    default=".jira.config.yaml",
+    help="Path to JIRA configuration file",
+)
+@click.option(
+    "-o",
+    "--output",
+    type=click.Path(),
+    required=True,
+    help="Output file path for fetched tasks",
+)
+@click.option(
+    "--max-results",
+    type=int,
+    default=50,
+    help="Maximum number of issues to fetch",
+)
+def fetch_jira(jql_query: str, config: str, output: str, max_results: int) -> None:
+    """
+    Fetch tasks from JIRA using JQL query.
+
+    Creates a new data file with tasks fetched from JIRA.
+
+    Examples:
+
+    \b
+    # Fetch tasks from current sprint
+    report-gen fetch-jira "project = MYPROJ AND sprint in openSprints()" -o tasks.yaml
+
+    \b
+    # Fetch high priority bugs
+    report-gen fetch-jira "project = MYPROJ AND type = Bug AND priority = High" -o bugs.yaml
+
+    \b
+    # Limit number of results
+    report-gen fetch-jira "project = MYPROJ" -o tasks.yaml --max-results 20
+    """
+    try:
+        from report_template.jira_client import create_jira_client
+
+        # Load JIRA config
+        config_path = Path(config)
+        if not config_path.exists():
+            click.echo(
+                f"Error: JIRA config file not found: {config_path}\n"
+                f"Create one from: .jira.config.example.yaml",
+                err=True
+            )
+            sys.exit(1)
+
+        with open(config_path) as f:
+            jira_config = yaml.safe_load(f).get('jira', {})
+
+        # Create JIRA client
+        try:
+            jira_client = create_jira_client(jira_config)
+            click.echo(f"✓ Connected to JIRA: {jira_config['url']}")
+        except Exception as e:
+            click.echo(f"Error connecting to JIRA: {str(e)}", err=True)
+            sys.exit(1)
+
+        # Fetch tasks
+        click.echo(f"\nFetching tasks with JQL: {jql_query}")
+        tasks = jira_client.fetch_tasks_by_jql(jql_query, max_results)
+
+        if not tasks:
+            click.echo("No tasks found matching query.")
+            sys.exit(0)
+
+        click.echo(f"\n✓ Fetched {len(tasks)} tasks from JIRA")
+
+        # Create minimal data structure
+        data = {
+            'tasks': tasks,
+            'title': 'Report from JIRA',
+            'project_name': 'Project',
+            'author': 'Auto-generated',
+            'summary': f'Tasks fetched from JIRA using: {jql_query}'
+        }
+
+        # Save to output file
+        output_path = Path(output)
+        with open(output_path, 'w') as f:
+            if output_path.suffix in [".yaml", ".yml"]:
+                yaml.dump(data, f, default_flow_style=False, sort_keys=False)
+            else:
+                json.dump(data, f, indent=2, default=str)
+
+        click.echo(f"✓ Tasks saved to: {output_path}")
+        click.echo(f"\nYou can now generate a report with:")
+        click.echo(f"  report-gen generate {output_path} -t feature_dev -o report.md")
+
+    except ImportError:
+        click.echo(
+            "Error: JIRA integration not available. "
+            "Install with: pip install atlassian-python-api",
+            err=True
+        )
+        sys.exit(1)
+    except Exception as e:
+        click.echo(f"Error: {str(e)}", err=True)
+        sys.exit(1)
+
+
 if __name__ == "__main__":
     main()
