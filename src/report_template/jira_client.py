@@ -63,7 +63,7 @@ class JiraClient:
         Search for JIRA issues using JQL.
 
         Args:
-            jql: JQL query string
+            jql: JQL query string (same as you'd use in JIRA's issue filter)
             max_results: Maximum number of results to return
 
         Returns:
@@ -73,14 +73,26 @@ class JiraClient:
             Exception: If JQL query is invalid or API error occurs
         """
         try:
-            result = self.jira.jql(jql, limit=max_results)
-            return result.get('issues', [])
+            # Use search_issues which is more robust and matches JIRA's search
+            issues = self.jira.jql(
+                jql,
+                limit=max_results,
+                fields='*all'  # Get all fields including custom fields
+            )
+            return issues.get('issues', []) if isinstance(issues, dict) else []
         except Exception as e:
             # Provide more helpful error message
             error_msg = str(e)
             if not error_msg:
                 error_msg = f"Unknown error executing JQL query: {jql}"
-            raise Exception(f"JQL query failed: {error_msg}") from e
+
+            # Provide helpful hints
+            if "project" in jql.lower() and " " in jql:
+                hint = "\n\nTip: Project names with spaces need quotes: project = \"My Project\""
+            else:
+                hint = "\n\nTip: Test your JQL in JIRA's issue search (Filters → Advanced) first"
+
+            raise Exception(f"JQL query failed: {error_msg}{hint}") from e
 
     def issue_to_task_data(self, issue: Dict[str, Any]) -> Dict[str, Any]:
         """
