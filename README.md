@@ -144,7 +144,7 @@ The DOCX format is ideal for:
 
 ## JIRA Integration
 
-Automatically fetch task data from your JIRA server - the easy way!
+Automatically fetch task data from your JIRA server!
 
 ### Quick Start with JIRA
 
@@ -153,7 +153,7 @@ Automatically fetch task data from your JIRA server - the easy way!
 cp .jira.config.example.yaml .jira.config.yaml
 # Edit with your JIRA URL, username, and API token
 
-# 2. Fetch tasks by ticket IDs (simplest method!)
+# 2. Fetch tasks by ticket IDs
 report-gen fetch-tickets PROJ-123 PROJ-124 PROJ-125 -o tasks.yaml
 
 # 3. Generate report with JIRA data
@@ -162,15 +162,12 @@ report-gen generate tasks.yaml -t feature_dev -o report.docx
 
 **That's it!** All task data (title, status, assignee, dates, etc.) is automatically fetched from JIRA.
 
-### Alternative Methods
+### Sync Existing Tasks
 
-**Fetch with JQL query** (for advanced users):
-```bash
-report-gen fetch-jira "project = MYPROJ AND sprint in openSprints()" -o tasks.yaml
-```
+You can also sync existing data files with JIRA to update task information:
 
-**Sync existing data file** with JIRA:
 ```bash
+# Update tasks that have jira_id field
 report-gen sync-jira feature_data.yaml
 ```
 
@@ -284,7 +281,7 @@ Options:
   -f, --format  Data format (yaml, json) [default: yaml]
 ```
 
-### Fetch Tasks from JIRA by Ticket IDs (Recommended)
+### Fetch Tasks from JIRA by Ticket IDs
 
 ```bash
 report-gen fetch-tickets <JIRA-ID> [<JIRA-ID> ...] -o <output>
@@ -292,16 +289,6 @@ report-gen fetch-tickets <JIRA-ID> [<JIRA-ID> ...] -o <output>
 Examples:
   report-gen fetch-tickets PROJ-123 PROJ-124 -o tasks.yaml
   report-gen fetch-tickets AUTH-101 AUTH-102 AUTH-103 -o feature.yaml
-```
-
-### Fetch Tasks from JIRA with JQL Query (Advanced)
-
-```bash
-report-gen fetch-jira <jql-query> -o <output> [options]
-
-Examples:
-  report-gen fetch-jira 'project = "My Project"' -o tasks.yaml
-  report-gen fetch-jira 'sprint in openSprints()' -o tasks.yaml
 ```
 
 ### Sync Existing Data with JIRA

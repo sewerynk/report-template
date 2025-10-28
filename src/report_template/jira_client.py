@@ -58,56 +58,6 @@ class JiraClient:
         issue = self.jira.issue(issue_key)
         return issue
 
-    def get_issues(self, jql: str, max_results: int = 50) -> List[Dict[str, Any]]:
-        """
-        Search for JIRA issues using JQL.
-
-        Args:
-            jql: JQL query string (same as you'd use in JIRA's issue filter)
-                 Supports complex queries with custom fields, date functions, etc.
-                 Example: 'type in (Epic) AND cf[29790] in (4907, 4908) AND worklogDate >= startOfWeek(-2)'
-            max_results: Maximum number of results to return
-
-        Returns:
-            List of issue dictionaries
-
-        Raises:
-            Exception: If JQL query is invalid or API error occurs
-        """
-        try:
-            # Use jql() method which properly handles complex queries with custom fields
-            result = self.jira.jql(
-                jql,
-                limit=max_results,
-                fields='*all'  # Get all fields including custom fields like cf[29790]
-            )
-
-            # Handle both response formats
-            if isinstance(result, dict):
-                return result.get('issues', [])
-            elif isinstance(result, list):
-                return result
-            else:
-                return []
-
-        except Exception as e:
-            # Provide more helpful error message
-            error_msg = str(e)
-            if not error_msg:
-                error_msg = f"Unknown error executing JQL query: {jql}"
-
-            # Provide helpful hints based on common issues
-            hints = []
-            if "project" in jql.lower() and " " in jql:
-                hints.append("Project names with spaces need quotes: project = \"My Project\"")
-            if "cf[" in jql:
-                hints.append("Make sure custom field IDs (cf[xxxxx]) match your JIRA instance")
-            if not hints:
-                hints.append("Test your JQL in JIRA's issue search (Filters → Advanced) first")
-
-            hint_text = "\n\nTips:\n- " + "\n- ".join(hints)
-            raise Exception(f"JQL query failed: {error_msg}{hint_text}") from e
-
     def issue_to_task_data(self, issue: Dict[str, Any]) -> Dict[str, Any]:
         """
         Convert JIRA issue to Task data format.
@@ -286,34 +236,6 @@ class JiraClient:
             updated_tasks.append(task)
 
         return updated_tasks
-
-    def fetch_tasks_by_jql(self, jql: str, max_results: int = 50) -> List[Dict[str, Any]]:
-        """
-        Fetch tasks from JIRA using JQL query.
-
-        Args:
-            jql: JQL query string (e.g., 'project = PROJ AND sprint = 5')
-            max_results: Maximum number of results
-
-        Returns:
-            List of task dictionaries
-
-        Example:
-            >>> client = JiraClient(url, username, token)
-            >>> tasks = client.fetch_tasks_by_jql('project = MYPROJ AND status != Done')
-        """
-        issues = self.get_issues(jql, max_results)
-        tasks = []
-
-        for issue in issues:
-            try:
-                task_data = self.issue_to_task_data(issue)
-                tasks.append(task_data)
-                print(f"✓ Fetched {task_data['jira_id']}: {task_data['title']}")
-            except Exception as e:
-                print(f"✗ Failed to process issue: {str(e)}")
-
-        return tasks
 
 
 def create_jira_client(config: Dict[str, str]) -> JiraClient:
