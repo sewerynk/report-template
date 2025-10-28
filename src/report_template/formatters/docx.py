@@ -221,9 +221,12 @@ def _create_feature_dev_report(doc: "Document", data: Dict[str, Any]) -> None:
                 task.get("assignee", "Unassigned"),
                 status_value,
                 priority_value,
+                task.get("jira_id", "N/A"),
+                _format_date(task.get("target_start_date")),
+                _format_date(task.get("target_end_date")),
                 _format_date(task.get("due_date"))
             ])
-        _add_table(doc, ["Task", "Assignee", "Status", "Priority", "Due Date"], task_rows)
+        _add_table(doc, ["Task", "Assignee", "Status", "Priority", "JIRA", "Start Date", "End Date", "Due Date"], task_rows)
     else:
         doc.add_paragraph("No tasks defined.")
         doc.add_paragraph()

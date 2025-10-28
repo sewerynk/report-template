@@ -65,6 +65,9 @@ class Task(BaseModel):
     status: Status
     priority: Priority = Priority.MEDIUM
     due_date: Optional[date_type] = None
+    target_start_date: Optional[date_type] = None
+    target_end_date: Optional[date_type] = None
+    jira_id: Optional[str] = None
     description: Optional[str] = None
     tags: List[str] = Field(default_factory=list)
 

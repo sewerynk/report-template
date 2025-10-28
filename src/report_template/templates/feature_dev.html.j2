@@ -174,6 +174,9 @@
                 <th>Assignee</th>
                 <th>Status</th>
                 <th>Priority</th>
+                <th>JIRA</th>
+                <th>Start Date</th>
+                <th>End Date</th>
                 <th>Due Date</th>
             </tr>
             {% for task in tasks %}
@@ -182,6 +185,9 @@
                 <td>{{ task.assignee or 'Unassigned' }}</td>
                 <td class="status-{{ task.status.value|lower|replace(' ', '-') }}">{{ task.status.value }}</td>
                 <td class="priority-{{ task.priority.value|lower }}">{{ task.priority.value }}</td>
+                <td>{{ task.jira_id or 'N/A' }}</td>
+                <td>{{ task.target_start_date|date if task.target_start_date else 'N/A' }}</td>
+                <td>{{ task.target_end_date|date if task.target_end_date else 'N/A' }}</td>
                 <td>{{ task.due_date|date if task.due_date else 'N/A' }}</td>
             </tr>
             {% endfor %}
