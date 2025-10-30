@@ -384,12 +384,26 @@ def sync_jira(data_file: str, config: str, output: Optional[str]) -> None:
     Sync task data with JIRA server.
 
     Fetches latest data from JIRA for all tasks that have a jira_id field.
+    You can create minimal tasks with ONLY jira_id, and all other fields
+    will be automatically populated from JIRA!
+
+    Workflow:
+    1. Create a YAML file with minimal tasks (just jira_id)
+    2. Run sync-jira to fetch all data from JIRA
+    3. Generate your report with complete task information
 
     Examples:
 
     \b
-    # Sync tasks in place
-    report-gen sync-jira feature_data.yaml
+    # Create a minimal YAML file:
+    # tasks:
+    #   - jira_id: K2A-1237
+    #   - jira_id: K2A-1238
+    #   - jira_id: K2A-1239
+
+    \b
+    # Sync to fetch all task data from JIRA
+    report-gen sync-jira my_tasks.yaml
 
     \b
     # Sync and save to new file
