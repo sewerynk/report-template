@@ -78,7 +78,7 @@
         .priority-high, .priority-critical { color: #e74c3c; font-weight: bold; }
         .priority-medium { color: #f39c12; }
         .priority-low { color: #95a5a6; }
-        .risk-box {
+        .ap-box {
             background-color: #fff3cd;
             border-left: 4px solid #ffc107;
             padding: 15px;
@@ -177,7 +177,6 @@
                 <th>JIRA</th>
                 <th>Start Date</th>
                 <th>End Date</th>
-                <th>Due Date</th>
             </tr>
             {% for task in tasks %}
             <tr>
@@ -188,7 +187,6 @@
                 <td>{{ task.jira_id or 'N/A' }}</td>
                 <td>{{ task.target_start_date|date if task.target_start_date else 'N/A' }}</td>
                 <td>{{ task.target_end_date|date if task.target_end_date else 'N/A' }}</td>
-                <td>{{ task.due_date|date if task.due_date else 'N/A' }}</td>
             </tr>
             {% endfor %}
         </table>
@@ -230,18 +228,18 @@
         <p>{{ deployment_plan or 'To be defined.' }}</p>
 
         <h2>Action Points</h2>
-        {% if action_points %}
-        {% for action_point in action_points %}
-        <div class="risk-box">
-            <h3>{{ loop.index }}. {{ action_point.description }}</h3>
-            <p><strong>Priority:</strong> <span class="priority-{{ action_point.priority.value|lower }}">{{ action_point.priority.value }}</span></p>
-            <p><strong>Status:</strong> <span class="status-{{ action_point.status.value|lower|replace(' ', '-') }}">{{ action_point.status.value }}</span></p>
-            {% if action_point.owner %}<p><strong>Owner:</strong> {{ action_point.owner }}</p>{% endif %}
-            {% if action_point.due_date %}<p><strong>Due Date:</strong> {{ action_point.due_date }}</p>{% endif %}
+        {% if action_point %}
+        {% for ap in action_point %}
+        <div class="ap-box">
+            <h3>{{ loop.index }}. {{ ap.description }}</h3>
+            <p><strong>Impact:</strong> <span class="priority-{{ ap.impact.value|lower }}">{{ ap.impact.value }}</span></p>
+            <p><strong>Likelihood:</strong> <span class="priority-{{ ap.ap_priority.value|lower }}">{{ ap.ap_priority.value }}</span></p>
+            <p><strong>Mitigation:</strong> {{ ap.mitigation }}</p>
+            {% if ap.owner %}<p><strong>Owner:</strong> {{ ap.owner }}</p>{% endif %}
         </div>
         {% endfor %}
         {% else %}
-        <p>No action points.</p>
+        <p>No action points identified.</p>
         {% endif %}
 
         <h2>Dependencies</h2>

@@ -74,7 +74,7 @@ class JiraClient:
             Dictionary with task data compatible with Task model
         """
         fields = issue.get('fields', {})
-
+        
         # Extract basic info
         task_data = {
             'title': fields.get('summary', 'Untitled'),
@@ -94,28 +94,21 @@ class JiraClient:
         assignee = fields.get('assignee')
         if assignee:
             task_data['assignee'] = assignee.get('displayName', assignee.get('name', ''))
-
-        # Extract dates
-        due_date = fields.get('duedate')
-        if due_date:
-            task_data['due_date'] = due_date
-
+            
         # Try to get custom date fields (common field names)
         # You may need to adjust these based on your JIRA setup
-        if 'customfield_10015' in fields:  # Common Sprint field
-            task_data['target_start_date'] = self._extract_date(fields.get('customfield_10015'))
+        if 'customfield_31590' in fields:  # Common Sprint field
+            task_data['target_start_date'] = self._extract_date(fields.get('customfield_31590'))
 
-        if 'customfield_10016' in fields:  # Common target end date field
-            task_data['target_end_date'] = self._extract_date(fields.get('customfield_10016'))
+        if 'customfield_31591' in fields:  # Common target end date field
+            task_data['target_end_date'] = self._extract_date(fields.get('customfield_31591'))
 
         # If start/end dates not found, try to use created and due dates
         if 'target_start_date' not in task_data:
+            print("target_start_date custom filed not found!")
             created = fields.get('created')
             if created:
                 task_data['target_start_date'] = created.split('T')[0]
-
-        if 'target_end_date' not in task_data and due_date:
-            task_data['target_end_date'] = due_date
 
         # Extract tags/labels
         labels = fields.get('labels', [])

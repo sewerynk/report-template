@@ -268,29 +268,27 @@ def _create_feature_dev_report(doc: "Document", data: Dict[str, Any]) -> None:
 
     # Action Points
     doc.add_heading("Action Points", level=1)
-    action_points = data.get("action_points", [])
-    if action_points:
-        for i, action_point in enumerate(action_points, 1):
-            doc.add_heading(f"{i}. {action_point.get('description', 'Action Point')}", level=2)
-            priority = action_point.get("priority", {})
-            status = action_point.get("status", {})
-            priority_value = priority.get("value", "N/A") if isinstance(priority, dict) else str(priority)
-            status_value = status.get("value", "N/A") if isinstance(status, dict) else str(status)
+    ap = data.get("action_point", [])
+    if ap:
+        for i, action in enumerate(ap, 1):
+            doc.add_heading(f"{i}. {action.get('description', 'action_point')}", level=2)
+            impact = action.get("impact", {})
+            ap_priority = action.get("ap_priority", {})
+            impact_value = impact.get("value", "N/A") if isinstance(impact, dict) else str(impact)
+            likelihood_value = ap_priority.get("value", "N/A") if isinstance(ap_priority, dict) else str(ap_priority)
 
             p = doc.add_paragraph()
-            p.add_run("Priority: ").bold = True
-            p.add_run(priority_value + "\n")
-            p.add_run("Status: ").bold = True
-            p.add_run(status_value)
-            if action_point.get("owner"):
+            p.add_run("Impact: ").bold = True
+            p.add_run(impact_value + "\n")
+            p.add_run("Likelihood: ").bold = True
+            p.add_run(likelihood_value + "\n")
+            p.add_run("Mitigation: ").bold = True
+            if action.get("owner"):
                 p.add_run("\nOwner: ").bold = True
-                p.add_run(action_point["owner"])
-            if action_point.get("due_date"):
-                p.add_run("\nDue Date: ").bold = True
-                p.add_run(str(action_point["due_date"]))
+                p.add_run(ap["owner"])
             doc.add_paragraph()
     else:
-        doc.add_paragraph("No action points.")
+        doc.add_paragraph("No Action Points identified.")
         doc.add_paragraph()
 
     # Dependencies

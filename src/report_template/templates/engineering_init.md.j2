@@ -147,18 +147,17 @@ No milestones defined.
 
 ## Action Points
 
-{% if action_points %}
-{% for action_point in action_points %}
-### {{ loop.index }}. {{ action_point.description }}
+{% if action_point %}
+{% for ap in action_point %}
+### {{ loop.index }}. {{ ap.description }}
 
-- **Priority:** {{ action_point.priority.value }}
-- **Status:** {{ action_point.status.value }}
-{% if action_point.owner %}- **Owner:** {{ action_point.owner }}{% endif %}
-{% if action_point.due_date %}- **Due Date:** {{ action_point.due_date }}{% endif %}
+- **Impact:** {{ ap.impact.value }}
+- **AP Priority:** {{ ap.ap_priority.value }}
+{% if ap.owner %}- **Owner:** {{ ap.owner }}{% endif %}
 
 {% endfor %}
 {% else %}
-No action points.
+No Action Points identified.
 {% endif %}
 
 ---

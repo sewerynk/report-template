@@ -64,7 +64,6 @@ class Task(BaseModel):
     assignee: Optional[str] = None
     status: Status
     priority: Priority = Priority.MEDIUM
-    due_date: Optional[date_type] = None
     target_start_date: Optional[date_type] = None
     target_end_date: Optional[date_type] = None
     jira_id: Optional[str] = None
@@ -80,11 +79,12 @@ class TeamMember(BaseModel):
     email: Optional[str] = None
 
 
-class ActionPoint(BaseModel):
-    """Represents an action point."""
+class ActionPoints(BaseModel):
+    """Provide a list of action points to be adresed to the project user."""
 
     description: str
-    priority: Priority
+    impact: Priority
+    ap_priority: Priority
     owner: Optional[str] = None
     due_date: Optional[date_type] = None
     status: Status = Status.NOT_STARTED
@@ -129,7 +129,7 @@ class FeatureDevReport(ReportData):
     tasks: List[Task] = Field(default_factory=list)
     testing_strategy: str = ""
     deployment_plan: str = ""
-    action_points: List[ActionPoint] = Field(default_factory=list)
+    action_point: List[ActionPoints] = Field(default_factory=list)
     dependencies: List[str] = Field(default_factory=list)
     milestones: List[Milestone] = Field(default_factory=list)
     progress_notes: str = ""
@@ -148,7 +148,7 @@ class ProgramMgmtReport(ReportData):
     milestones: List[Milestone] = Field(default_factory=list)
     key_achievements: List[str] = Field(default_factory=list)
     challenges: List[str] = Field(default_factory=list)
-    action_points: List[ActionPoint] = Field(default_factory=list)
+    action_point: List[ActionPoints] = Field(default_factory=list)
     upcoming_activities: List[str] = Field(default_factory=list)
     decisions_needed: List[str] = Field(default_factory=list)
     kpis: Dict[str, Any] = Field(default_factory=dict)
@@ -171,7 +171,7 @@ class EngineeringInitReport(ReportData):
     implementation_phases: List[Dict[str, Any]] = Field(default_factory=list)
     success_criteria: List[str] = Field(default_factory=list)
     milestones: List[Milestone] = Field(default_factory=list)
-    action_points: List[ActionPoint] = Field(default_factory=list)
+    action_point: List[ActionPoints] = Field(default_factory=list)
     resources_required: str = ""
     impact_analysis: str = ""
     rollout_strategy: str = ""
