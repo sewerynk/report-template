@@ -619,12 +619,18 @@ def fetch_tickets(jira_ids: tuple, config: str, output: str) -> None:
     default=None,
     help="Parent page ID (optional, for creating page under a parent)",
 )
+@click.option(
+    "--debug",
+    is_flag=True,
+    help="Save sanitized HTML to debug file for inspection",
+)
 def push_confluence(
     report_file: str,
     config: str,
     title: Optional[str],
     space: Optional[str],
-    parent_id: Optional[str]
+    parent_id: Optional[str],
+    debug: bool
 ) -> None:
     """
     Push a generated report to Confluence.
@@ -657,6 +663,10 @@ def push_confluence(
     \b
     # Push under a parent page
     report-gen push-confluence report.html --parent-id "123456789"
+
+    \b
+    # Debug mode - save sanitized HTML for inspection
+    report-gen push-confluence report.html --debug
     """
     try:
         from report_template.confluence_client import create_confluence_client
@@ -698,6 +708,13 @@ def push_confluence(
         # Prepare HTML for Confluence storage format
         click.echo("Preparing HTML for Confluence...")
         html_content = confluence_client.prepare_html_for_confluence(html_content)
+
+        # Save debug file if requested
+        if debug:
+            debug_file = report_path.with_suffix('.confluence-debug.html')
+            with open(debug_file, 'w', encoding='utf-8') as f:
+                f.write(html_content)
+            click.echo(f"Debug: Sanitized HTML saved to {debug_file}")
 
         # Determine space key
         space_key = space or confluence_config.get('space_key')

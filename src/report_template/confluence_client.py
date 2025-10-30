@@ -48,17 +48,34 @@ class ConfluenceClient:
         if body_match:
             html_content = body_match.group(1)
 
-        # Remove <!DOCTYPE> declarations
+        # Remove problematic elements
         html_content = re.sub(r'<!DOCTYPE[^>]*>', '', html_content, flags=re.IGNORECASE)
-
-        # Remove <html>, <head>, and <body> tags if present
         html_content = re.sub(r'</?html[^>]*>', '', html_content, flags=re.IGNORECASE)
         html_content = re.sub(r'<head>.*?</head>', '', html_content, flags=re.DOTALL | re.IGNORECASE)
         html_content = re.sub(r'</?body[^>]*>', '', html_content, flags=re.IGNORECASE)
-
-        # Replace CSS style tags with inline styles where possible
-        # Confluence prefers inline styles
         html_content = re.sub(r'<style[^>]*>.*?</style>', '', html_content, flags=re.DOTALL | re.IGNORECASE)
+        html_content = re.sub(r'<script[^>]*>.*?</script>', '', html_content, flags=re.DOTALL | re.IGNORECASE)
+        html_content = re.sub(r'<meta[^>]*>', '', html_content, flags=re.IGNORECASE)
+        html_content = re.sub(r'<link[^>]*>', '', html_content, flags=re.IGNORECASE)
+
+        # Fix self-closing tags to be XHTML compliant
+        html_content = re.sub(r'<br\s*>', '<br />', html_content, flags=re.IGNORECASE)
+        html_content = re.sub(r'<br\s*/>', '<br />', html_content, flags=re.IGNORECASE)
+        html_content = re.sub(r'<hr\s*>', '<hr />', html_content, flags=re.IGNORECASE)
+        html_content = re.sub(r'<hr\s*/>', '<hr />', html_content, flags=re.IGNORECASE)
+
+        # Fix img tags
+        html_content = re.sub(r'<img\s+([^>]+)(?<!/)>', r'<img \1 />', html_content, flags=re.IGNORECASE)
+
+        # Remove or fix problematic attributes
+        # Remove onclick, onload, and other event handlers
+        html_content = re.sub(r'\s+on\w+\s*=\s*["\'][^"\']*["\']', '', html_content, flags=re.IGNORECASE)
+
+        # Remove empty attributes (like class="" or id="")
+        html_content = re.sub(r'\s+(class|id|style)\s*=\s*["\']["\']', '', html_content, flags=re.IGNORECASE)
+
+        # Clean up multiple spaces in attributes
+        html_content = re.sub(r'(\w+)\s*=\s*"([^"]*)"', lambda m: f'{m.group(1)}="{m.group(2).strip()}"', html_content)
 
         # Clean up whitespace
         html_content = html_content.strip()
