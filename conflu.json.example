@@ -1,0 +1,15 @@
+{
+  "_comment": "Confluence Configuration - Copy this to conflu.json and fill in your details",
+  "confluence": {
+    "url": "https://confluence.example.com",
+    "api_token": "your-personal-access-token-here",
+    "space_key": "PROJ",
+    "parent_page_id": null
+  },
+  "_notes": {
+    "url": "Your Confluence server URL (e.g., https://confluence.ext.net.example.com)",
+    "api_token": "Generate a Personal Access Token (PAT) from Profile → Personal Access Tokens",
+    "space_key": "The space where reports will be created (e.g., 'PROJ', 'TEAM')",
+    "parent_page_id": "Optional: ID of parent page to create reports under (leave null for top-level pages)"
+  }
+}

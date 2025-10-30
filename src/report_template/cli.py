@@ -593,5 +593,152 @@ def fetch_tickets(jira_ids: tuple, config: str, output: str) -> None:
         sys.exit(1)
 
 
+@main.command()
+@click.argument("report_file", type=click.Path(exists=True))
+@click.option(
+    "--config",
+    type=click.Path(exists=True),
+    default="conflu.json",
+    help="Path to Confluence configuration file (JSON)",
+)
+@click.option(
+    "--title",
+    type=str,
+    default=None,
+    help="Page title (defaults to report title from data file)",
+)
+@click.option(
+    "--space",
+    type=str,
+    default=None,
+    help="Confluence space key (overrides config file)",
+)
+@click.option(
+    "--parent-id",
+    type=str,
+    default=None,
+    help="Parent page ID (optional, for creating page under a parent)",
+)
+def push_confluence(
+    report_file: str,
+    config: str,
+    title: Optional[str],
+    space: Optional[str],
+    parent_id: Optional[str]
+) -> None:
+    """
+    Push a generated report to Confluence.
+
+    This command takes an HTML report file and pushes it to a Confluence page.
+    If the page already exists (matched by title), it will be updated.
+    Otherwise, a new page will be created.
+
+    The report file should be generated first using the 'generate' command
+    with HTML format.
+
+    Examples:
+
+    \b
+    # Generate HTML report first
+    report-gen generate my_report.yaml -t feature_dev -o report.html
+
+    \b
+    # Push to Confluence (will create or update page)
+    report-gen push-confluence report.html
+
+    \b
+    # Push with custom title
+    report-gen push-confluence report.html --title "Weekly Status Report"
+
+    \b
+    # Push to specific space
+    report-gen push-confluence report.html --space "MYSPACE"
+
+    \b
+    # Push under a parent page
+    report-gen push-confluence report.html --parent-id "123456789"
+    """
+    try:
+        from report_template.confluence_client import create_confluence_client
+
+        # Load Confluence config
+        config_path = Path(config)
+        if not config_path.exists():
+            click.echo(
+                f"Error: Confluence config file not found: {config_path}\n"
+                f"Create one from: conflu.json.example",
+                err=True
+            )
+            sys.exit(1)
+
+        with open(config_path) as f:
+            confluence_config = json.load(f).get('confluence', {})
+
+        # Create Confluence client
+        try:
+            confluence_client = create_confluence_client(confluence_config)
+            click.echo(f"✓ Connected to Confluence: {confluence_config['url']}")
+        except Exception as e:
+            click.echo(f"Error connecting to Confluence: {str(e)}", err=True)
+            sys.exit(1)
+
+        # Read report file
+        report_path = Path(report_file)
+        if report_path.suffix not in ['.html', '.htm']:
+            click.echo(
+                "Error: Report file must be HTML format.\n"
+                "Generate HTML report first: report-gen generate data.yaml -t feature_dev -o report.html",
+                err=True
+            )
+            sys.exit(1)
+
+        with open(report_path, 'r', encoding='utf-8') as f:
+            html_content = f.read()
+
+        # Determine space key
+        space_key = space or confluence_config.get('space_key')
+        if not space_key:
+            click.echo(
+                "Error: Space key not specified.\n"
+                "Either set it in conflu.json or use --space option.",
+                err=True
+            )
+            sys.exit(1)
+
+        # Determine page title
+        page_title = title or report_path.stem
+        click.echo(f"\nPage title: {page_title}")
+        click.echo(f"Space: {space_key}")
+
+        # Determine parent ID
+        page_parent_id = parent_id or confluence_config.get('parent_page_id')
+        if page_parent_id:
+            click.echo(f"Parent page ID: {page_parent_id}")
+
+        # Push to Confluence
+        click.echo("\nPushing to Confluence...")
+        result = confluence_client.create_or_update_page(
+            space_key=space_key,
+            title=page_title,
+            content=html_content,
+            parent_id=page_parent_id
+        )
+
+        page_url = confluence_client.get_page_url(result)
+        click.echo(f"\n✓ Successfully pushed to Confluence!")
+        click.echo(f"  Page URL: {page_url}")
+
+    except ImportError:
+        click.echo(
+            "Error: Requests library not available. "
+            "Install with: pip install requests",
+            err=True
+        )
+        sys.exit(1)
+    except Exception as e:
+        click.echo(f"Error: {str(e)}", err=True)
+        sys.exit(1)
+
+
 if __name__ == "__main__":
     main()
