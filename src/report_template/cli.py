@@ -241,12 +241,13 @@ def init(report_type: str, output: str, output_format: str) -> None:
             ],
             "testing_strategy": "Unit tests for auth logic, integration tests for OAuth flow, security testing.",
             "deployment_plan": "Rolling deployment to staging, then production after QA approval.",
-            "risks": [
+            "action_points": [
                 {
-                    "description": "OAuth provider downtime",
-                    "impact": "High",
-                    "likelihood": "Low",
-                    "mitigation": "Implement fallback to local authentication",
+                    "description": "Review security audit findings and implement recommendations",
+                    "priority": "High",
+                    "status": "In Progress",
+                    "owner": "Security Team",
+                    "due_date": str(date.today() + timedelta(days=7)),
                 }
             ],
         },

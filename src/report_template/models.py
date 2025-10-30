@@ -86,6 +86,8 @@ class ActionPoints(BaseModel):
     impact: Priority
     ap_priority: Priority
     owner: Optional[str] = None
+    due_date: Optional[date_type] = None
+    status: Status = Status.NOT_STARTED
 
 
 class ReportData(BaseModel):
