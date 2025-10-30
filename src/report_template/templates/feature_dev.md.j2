@@ -121,20 +121,20 @@ No milestones defined.
 
 ---
 
-## Risks & Mitigation
+## Action Points
 
-{% if risks %}
-{% for risk in risks %}
-### {{ loop.index }}. {{ risk.description }}
+{% if action_points %}
+{% for action_point in action_points %}
+### {{ loop.index }}. {{ action_point.description }}
 
-- **Impact:** {{ risk.impact.value }}
-- **Likelihood:** {{ risk.likelihood.value }}
-- **Mitigation:** {{ risk.mitigation }}
-{% if risk.owner %}- **Owner:** {{ risk.owner }}{% endif %}
+- **Priority:** {{ action_point.priority.value }}
+- **Status:** {{ action_point.status.value }}
+{% if action_point.owner %}- **Owner:** {{ action_point.owner }}{% endif %}
+{% if action_point.due_date %}- **Due Date:** {{ action_point.due_date }}{% endif %}
 
 {% endfor %}
 {% else %}
-No risks identified.
+No action points.
 {% endif %}
 
 ---

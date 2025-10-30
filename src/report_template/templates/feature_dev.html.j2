@@ -229,19 +229,19 @@
         <h2>Deployment Plan</h2>
         <p>{{ deployment_plan or 'To be defined.' }}</p>
 
-        <h2>Risks & Mitigation</h2>
-        {% if risks %}
-        {% for risk in risks %}
+        <h2>Action Points</h2>
+        {% if action_points %}
+        {% for action_point in action_points %}
         <div class="risk-box">
-            <h3>{{ loop.index }}. {{ risk.description }}</h3>
-            <p><strong>Impact:</strong> <span class="priority-{{ risk.impact.value|lower }}">{{ risk.impact.value }}</span></p>
-            <p><strong>Likelihood:</strong> <span class="priority-{{ risk.likelihood.value|lower }}">{{ risk.likelihood.value }}</span></p>
-            <p><strong>Mitigation:</strong> {{ risk.mitigation }}</p>
-            {% if risk.owner %}<p><strong>Owner:</strong> {{ risk.owner }}</p>{% endif %}
+            <h3>{{ loop.index }}. {{ action_point.description }}</h3>
+            <p><strong>Priority:</strong> <span class="priority-{{ action_point.priority.value|lower }}">{{ action_point.priority.value }}</span></p>
+            <p><strong>Status:</strong> <span class="status-{{ action_point.status.value|lower|replace(' ', '-') }}">{{ action_point.status.value }}</span></p>
+            {% if action_point.owner %}<p><strong>Owner:</strong> {{ action_point.owner }}</p>{% endif %}
+            {% if action_point.due_date %}<p><strong>Due Date:</strong> {{ action_point.due_date }}</p>{% endif %}
         </div>
         {% endfor %}
         {% else %}
-        <p>No risks identified.</p>
+        <p>No action points.</p>
         {% endif %}
 
         <h2>Dependencies</h2>

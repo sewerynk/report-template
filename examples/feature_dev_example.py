@@ -10,7 +10,7 @@ from report_template import (
     ReportGenerator,
     ReportType,
 )
-from report_template.models import Milestone, Priority, Risk, Status, Task, TeamMember
+from report_template.models import ActionPoint, Milestone, Priority, Status, Task, TeamMember
 
 
 def main():
@@ -163,30 +163,27 @@ Phased rollout strategy:
 
 Rollback plan: Feature flag can instantly disable new auth system.
         """,
-        risks=[
-            Risk(
-                description="OAuth provider API changes or downtime",
-                impact=Priority.HIGH,
-                likelihood=Priority.LOW,
-                mitigation="Implement fallback to email/password authentication, "
-                "monitor provider status pages",
-                owner="John Doe",
-            ),
-            Risk(
-                description="Redis cluster failure causing session loss",
-                impact=Priority.MEDIUM,
-                likelihood=Priority.LOW,
-                mitigation="Set up Redis cluster with replication, implement "
-                "session persistence to database",
-                owner="DevOps Team",
-            ),
-            Risk(
-                description="Security vulnerabilities in authentication flow",
-                impact=Priority.CRITICAL,
-                likelihood=Priority.MEDIUM,
-                mitigation="Comprehensive security audit, penetration testing, "
-                "code review by security team",
+        action_points=[
+            ActionPoint(
+                description="Complete security audit of authentication flow",
+                priority=Priority.CRITICAL,
+                status=Status.IN_PROGRESS,
                 owner="Bob Johnson",
+                due_date=date.today() + timedelta(days=7),
+            ),
+            ActionPoint(
+                description="Set up Redis cluster with replication for production",
+                priority=Priority.HIGH,
+                status=Status.NOT_STARTED,
+                owner="DevOps Team",
+                due_date=date.today() + timedelta(days=14),
+            ),
+            ActionPoint(
+                description="Implement monitoring for OAuth provider status",
+                priority=Priority.MEDIUM,
+                status=Status.NOT_STARTED,
+                owner="John Doe",
+                due_date=date.today() + timedelta(days=21),
             ),
         ],
         dependencies=[

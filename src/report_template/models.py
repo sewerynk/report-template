@@ -80,14 +80,14 @@ class TeamMember(BaseModel):
     email: Optional[str] = None
 
 
-class Risk(BaseModel):
-    """Represents a project risk."""
+class ActionPoint(BaseModel):
+    """Represents an action point."""
 
     description: str
-    impact: Priority
-    likelihood: Priority
-    mitigation: str
+    priority: Priority
     owner: Optional[str] = None
+    due_date: Optional[date_type] = None
+    status: Status = Status.NOT_STARTED
 
 
 class ReportData(BaseModel):
@@ -129,7 +129,7 @@ class FeatureDevReport(ReportData):
     tasks: List[Task] = Field(default_factory=list)
     testing_strategy: str = ""
     deployment_plan: str = ""
-    risks: List[Risk] = Field(default_factory=list)
+    action_points: List[ActionPoint] = Field(default_factory=list)
     dependencies: List[str] = Field(default_factory=list)
     milestones: List[Milestone] = Field(default_factory=list)
     progress_notes: str = ""
@@ -148,7 +148,7 @@ class ProgramMgmtReport(ReportData):
     milestones: List[Milestone] = Field(default_factory=list)
     key_achievements: List[str] = Field(default_factory=list)
     challenges: List[str] = Field(default_factory=list)
-    risks: List[Risk] = Field(default_factory=list)
+    action_points: List[ActionPoint] = Field(default_factory=list)
     upcoming_activities: List[str] = Field(default_factory=list)
     decisions_needed: List[str] = Field(default_factory=list)
     kpis: Dict[str, Any] = Field(default_factory=dict)
@@ -171,7 +171,7 @@ class EngineeringInitReport(ReportData):
     implementation_phases: List[Dict[str, Any]] = Field(default_factory=list)
     success_criteria: List[str] = Field(default_factory=list)
     milestones: List[Milestone] = Field(default_factory=list)
-    risks: List[Risk] = Field(default_factory=list)
+    action_points: List[ActionPoint] = Field(default_factory=list)
     resources_required: str = ""
     impact_analysis: str = ""
     rollout_strategy: str = ""

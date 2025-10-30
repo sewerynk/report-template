@@ -266,30 +266,31 @@ def _create_feature_dev_report(doc: "Document", data: Dict[str, Any]) -> None:
     doc.add_paragraph(data.get("deployment_plan", "To be defined."))
     doc.add_paragraph()
 
-    # Risks & Mitigation
-    doc.add_heading("Risks & Mitigation", level=1)
-    risks = data.get("risks", [])
-    if risks:
-        for i, risk in enumerate(risks, 1):
-            doc.add_heading(f"{i}. {risk.get('description', 'Risk')}", level=2)
-            impact = risk.get("impact", {})
-            likelihood = risk.get("likelihood", {})
-            impact_value = impact.get("value", "N/A") if isinstance(impact, dict) else str(impact)
-            likelihood_value = likelihood.get("value", "N/A") if isinstance(likelihood, dict) else str(likelihood)
+    # Action Points
+    doc.add_heading("Action Points", level=1)
+    action_points = data.get("action_points", [])
+    if action_points:
+        for i, action_point in enumerate(action_points, 1):
+            doc.add_heading(f"{i}. {action_point.get('description', 'Action Point')}", level=2)
+            priority = action_point.get("priority", {})
+            status = action_point.get("status", {})
+            priority_value = priority.get("value", "N/A") if isinstance(priority, dict) else str(priority)
+            status_value = status.get("value", "N/A") if isinstance(status, dict) else str(status)
 
             p = doc.add_paragraph()
-            p.add_run("Impact: ").bold = True
-            p.add_run(impact_value + "\n")
-            p.add_run("Likelihood: ").bold = True
-            p.add_run(likelihood_value + "\n")
-            p.add_run("Mitigation: ").bold = True
-            p.add_run(risk.get("mitigation", "N/A"))
-            if risk.get("owner"):
+            p.add_run("Priority: ").bold = True
+            p.add_run(priority_value + "\n")
+            p.add_run("Status: ").bold = True
+            p.add_run(status_value)
+            if action_point.get("owner"):
                 p.add_run("\nOwner: ").bold = True
-                p.add_run(risk["owner"])
+                p.add_run(action_point["owner"])
+            if action_point.get("due_date"):
+                p.add_run("\nDue Date: ").bold = True
+                p.add_run(str(action_point["due_date"]))
             doc.add_paragraph()
     else:
-        doc.add_paragraph("No risks identified.")
+        doc.add_paragraph("No action points.")
         doc.add_paragraph()
 
     # Dependencies
@@ -376,27 +377,27 @@ def _create_program_mgmt_report(doc: "Document", data: Dict[str, Any]) -> None:
     doc.add_heading("Challenges", level=1)
     _add_list(doc, data.get("challenges", []))
 
-    # Risks
-    doc.add_heading("Risks", level=1)
-    risks = data.get("risks", [])
-    if risks:
-        risk_rows = []
-        for risk in risks:
-            impact = risk.get("impact", {})
-            likelihood = risk.get("likelihood", {})
-            impact_value = impact.get("value", "N/A") if isinstance(impact, dict) else str(impact)
-            likelihood_value = likelihood.get("value", "N/A") if isinstance(likelihood, dict) else str(likelihood)
+    # Action Points
+    doc.add_heading("Action Points", level=1)
+    action_points = data.get("action_points", [])
+    if action_points:
+        action_point_rows = []
+        for action_point in action_points:
+            priority = action_point.get("priority", {})
+            status = action_point.get("status", {})
+            priority_value = priority.get("value", "N/A") if isinstance(priority, dict) else str(priority)
+            status_value = status.get("value", "N/A") if isinstance(status, dict) else str(status)
 
-            risk_rows.append([
-                risk.get("description", "N/A"),
-                impact_value,
-                likelihood_value,
-                risk.get("mitigation", "N/A"),
-                risk.get("owner", "N/A")
+            action_point_rows.append([
+                action_point.get("description", "N/A"),
+                priority_value,
+                status_value,
+                action_point.get("owner", "N/A"),
+                str(action_point.get("due_date", "N/A"))
             ])
-        _add_table(doc, ["Risk", "Impact", "Likelihood", "Mitigation", "Owner"], risk_rows)
+        _add_table(doc, ["Action Point", "Priority", "Status", "Owner", "Due Date"], action_point_rows)
     else:
-        doc.add_paragraph("No risks identified.")
+        doc.add_paragraph("No action points.")
         doc.add_paragraph()
 
     # Budget Summary
@@ -523,30 +524,31 @@ def _create_engineering_init_report(doc: "Document", data: Dict[str, Any]) -> No
     doc.add_paragraph(data.get("resources_required", "To be defined."))
     doc.add_paragraph()
 
-    # Risks & Mitigation
-    doc.add_heading("Risks & Mitigation", level=1)
-    risks = data.get("risks", [])
-    if risks:
-        for i, risk in enumerate(risks, 1):
-            doc.add_heading(f"{i}. {risk.get('description', 'Risk')}", level=2)
-            impact = risk.get("impact", {})
-            likelihood = risk.get("likelihood", {})
-            impact_value = impact.get("value", "N/A") if isinstance(impact, dict) else str(impact)
-            likelihood_value = likelihood.get("value", "N/A") if isinstance(likelihood, dict) else str(likelihood)
+    # Action Points
+    doc.add_heading("Action Points", level=1)
+    action_points = data.get("action_points", [])
+    if action_points:
+        for i, action_point in enumerate(action_points, 1):
+            doc.add_heading(f"{i}. {action_point.get('description', 'Action Point')}", level=2)
+            priority = action_point.get("priority", {})
+            status = action_point.get("status", {})
+            priority_value = priority.get("value", "N/A") if isinstance(priority, dict) else str(priority)
+            status_value = status.get("value", "N/A") if isinstance(status, dict) else str(status)
 
             p = doc.add_paragraph()
-            p.add_run("Impact: ").bold = True
-            p.add_run(impact_value + "\n")
-            p.add_run("Likelihood: ").bold = True
-            p.add_run(likelihood_value + "\n")
-            p.add_run("Mitigation: ").bold = True
-            p.add_run(risk.get("mitigation", "N/A"))
-            if risk.get("owner"):
+            p.add_run("Priority: ").bold = True
+            p.add_run(priority_value + "\n")
+            p.add_run("Status: ").bold = True
+            p.add_run(status_value)
+            if action_point.get("owner"):
                 p.add_run("\nOwner: ").bold = True
-                p.add_run(risk["owner"])
+                p.add_run(action_point["owner"])
+            if action_point.get("due_date"):
+                p.add_run("\nDue Date: ").bold = True
+                p.add_run(str(action_point["due_date"]))
             doc.add_paragraph()
     else:
-        doc.add_paragraph("No risks identified.")
+        doc.add_paragraph("No action points.")
         doc.add_paragraph()
 
     # Rollout Strategy

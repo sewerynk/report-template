@@ -104,16 +104,16 @@ No challenges identified.
 
 ---
 
-## Risks
+## Action Points
 
-{% if risks %}
-| Risk | Impact | Likelihood | Mitigation | Owner |
-|------|--------|------------|------------|-------|
-{% for risk in risks %}
-| {{ risk.description }} | {{ risk.impact.value }} | {{ risk.likelihood.value }} | {{ risk.mitigation }} | {{ risk.owner or 'N/A' }} |
+{% if action_points %}
+| Action Point | Priority | Status | Owner | Due Date |
+|--------------|----------|--------|-------|----------|
+{% for action_point in action_points %}
+| {{ action_point.description }} | {{ action_point.priority.value }} | {{ action_point.status.value }} | {{ action_point.owner or 'N/A' }} | {{ action_point.due_date or 'N/A' }} |
 {% endfor %}
 {% else %}
-No risks identified.
+No action points.
 {% endif %}
 
 ---
