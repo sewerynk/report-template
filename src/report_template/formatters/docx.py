@@ -266,16 +266,16 @@ def _create_feature_dev_report(doc: "Document", data: Dict[str, Any]) -> None:
     doc.add_paragraph(data.get("deployment_plan", "To be defined."))
     doc.add_paragraph()
 
-    # Risks & Mitigation
-    doc.add_heading("Risks & Mitigation", level=1)
-    risks = data.get("risks", [])
-    if risks:
-        for i, risk in enumerate(risks, 1):
-            doc.add_heading(f"{i}. {risk.get('description', 'Risk')}", level=2)
-            impact = risk.get("impact", {})
-            likelihood = risk.get("likelihood", {})
+    # Action Points
+    doc.add_heading("Action Points", level=1)
+    ap = data.get("action_point", [])
+    if ap:
+        for i, action in enumerate(ap, 1):
+            doc.add_heading(f"{i}. {action.get('description', 'action_point')}", level=2)
+            impact = action.get("impact", {})
+            ap_priority = action.get("ap_priority", {})
             impact_value = impact.get("value", "N/A") if isinstance(impact, dict) else str(impact)
-            likelihood_value = likelihood.get("value", "N/A") if isinstance(likelihood, dict) else str(likelihood)
+            likelihood_value = ap_priority.get("value", "N/A") if isinstance(ap_priority, dict) else str(ap_priority)
 
             p = doc.add_paragraph()
             p.add_run("Impact: ").bold = True
@@ -283,13 +283,12 @@ def _create_feature_dev_report(doc: "Document", data: Dict[str, Any]) -> None:
             p.add_run("Likelihood: ").bold = True
             p.add_run(likelihood_value + "\n")
             p.add_run("Mitigation: ").bold = True
-            p.add_run(risk.get("mitigation", "N/A"))
-            if risk.get("owner"):
+            if action.get("owner"):
                 p.add_run("\nOwner: ").bold = True
-                p.add_run(risk["owner"])
+                p.add_run(ap["owner"])
             doc.add_paragraph()
     else:
-        doc.add_paragraph("No risks identified.")
+        doc.add_paragraph("No Action Points identified.")
         doc.add_paragraph()
 
     # Dependencies
