@@ -4,6 +4,7 @@ Confluence integration module for pushing reports to Confluence pages.
 
 from typing import Any, Dict, Optional
 import requests
+import re
 
 
 class ConfluenceClient:
@@ -27,6 +28,46 @@ class ConfluenceClient:
             "Accept": "application/json",
             "Content-Type": "application/json"
         }
+
+    @staticmethod
+    def prepare_html_for_confluence(html_content: str) -> str:
+        """
+        Prepare HTML content for Confluence storage format.
+
+        Confluence's storage format is based on XHTML and has specific requirements.
+        This method cleans up the HTML to be Confluence-compatible.
+
+        Args:
+            html_content: Raw HTML content
+
+        Returns:
+            Cleaned HTML suitable for Confluence storage format
+        """
+        # Extract body content if full HTML document
+        body_match = re.search(r'<body[^>]*>(.*?)</body>', html_content, re.DOTALL | re.IGNORECASE)
+        if body_match:
+            html_content = body_match.group(1)
+
+        # Remove <!DOCTYPE> declarations
+        html_content = re.sub(r'<!DOCTYPE[^>]*>', '', html_content, flags=re.IGNORECASE)
+
+        # Remove <html>, <head>, and <body> tags if present
+        html_content = re.sub(r'</?html[^>]*>', '', html_content, flags=re.IGNORECASE)
+        html_content = re.sub(r'<head>.*?</head>', '', html_content, flags=re.DOTALL | re.IGNORECASE)
+        html_content = re.sub(r'</?body[^>]*>', '', html_content, flags=re.IGNORECASE)
+
+        # Replace CSS style tags with inline styles where possible
+        # Confluence prefers inline styles
+        html_content = re.sub(r'<style[^>]*>.*?</style>', '', html_content, flags=re.DOTALL | re.IGNORECASE)
+
+        # Clean up whitespace
+        html_content = html_content.strip()
+
+        # Wrap in a div if not already wrapped
+        if not html_content.startswith('<div') and not html_content.startswith('<p'):
+            html_content = f'<div>{html_content}</div>'
+
+        return html_content
 
     def get_page_by_title(self, space_key: str, title: str) -> Optional[Dict[str, Any]]:
         """
@@ -111,17 +152,31 @@ class ConfluenceClient:
             return response.json()
 
         except requests.exceptions.HTTPError as e:
+            # Get detailed error message from response
+            error_detail = ""
+            try:
+                error_response = e.response.json()
+                error_detail = error_response.get('message', str(error_response))
+            except:
+                error_detail = e.response.text
+
             if e.response.status_code == 400:
                 raise Exception(
-                    f"Failed to create page '{title}': Invalid data. "
-                    "Check that space key and content are valid."
+                    f"Failed to create page '{title}': Invalid data.\n"
+                    f"Space key: {space_key}\n"
+                    f"Error details: {error_detail}\n"
+                    f"Tip: Check that the space key exists and your HTML content is valid."
                 ) from e
             elif e.response.status_code == 403:
                 raise Exception(
-                    f"Access denied. Check your Confluence PAT has write permissions to space '{space_key}'."
+                    f"Access denied. Check your Confluence PAT has write permissions to space '{space_key}'.\n"
+                    f"Error details: {error_detail}"
                 ) from e
             else:
-                raise Exception(f"Failed to create page '{title}': {str(e)}") from e
+                raise Exception(
+                    f"Failed to create page '{title}': {str(e)}\n"
+                    f"Error details: {error_detail}"
+                ) from e
         except requests.exceptions.RequestException as e:
             raise Exception(f"Failed to connect to Confluence: {str(e)}") from e
 

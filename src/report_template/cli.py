@@ -695,6 +695,10 @@ def push_confluence(
         with open(report_path, 'r', encoding='utf-8') as f:
             html_content = f.read()
 
+        # Prepare HTML for Confluence storage format
+        click.echo("Preparing HTML for Confluence...")
+        html_content = confluence_client.prepare_html_for_confluence(html_content)
+
         # Determine space key
         space_key = space or confluence_config.get('space_key')
         if not space_key:
@@ -707,7 +711,7 @@ def push_confluence(
 
         # Determine page title
         page_title = title or report_path.stem
-        click.echo(f"\nPage title: {page_title}")
+        click.echo(f"Page title: {page_title}")
         click.echo(f"Space: {space_key}")
 
         # Determine parent ID
