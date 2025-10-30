@@ -209,3 +209,6 @@ __marimo__/
 # JIRA configuration (contains sensitive API tokens)
 .jira.config.yaml
 .jira.config.yml
+
+# Confluence configuration (contains sensitive API tokens)
+conflu.json

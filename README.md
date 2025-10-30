@@ -194,6 +194,74 @@ report-gen generate tasks.yaml -t feature_dev -o report.docx
 
 See the [JIRA Integration Guide](docs/jira-integration.md) for detailed setup and usage.
 
+## Confluence Integration
+
+Push your generated reports directly to Confluence pages!
+
+### Quick Start with Confluence
+
+```bash
+# 1. Setup Confluence configuration (one-time setup)
+cp conflu.json.example conflu.json
+# Edit with your Confluence URL and Personal Access Token (PAT)
+
+# 2. Generate HTML report
+report-gen generate my_report.yaml -t feature_dev -o report.html
+
+# 3. Push to Confluence
+report-gen push-confluence report.html
+```
+
+**That's it!** Your report is now published on Confluence and accessible to your team.
+
+### How to Get Your Confluence PAT
+
+1. Log into your Confluence instance
+2. Go to **Profile → Personal Access Tokens**
+3. Create a new token with write permissions
+4. Copy the token and add it to `conflu.json`
+
+### Configuration
+
+Edit `conflu.json`:
+```json
+{
+  "confluence": {
+    "url": "https://confluence.example.com",
+    "api_token": "your-personal-access-token",
+    "space_key": "PROJ",
+    "parent_page_id": null
+  }
+}
+```
+
+- **url**: Your Confluence instance URL
+- **api_token**: Personal Access Token (PAT)
+- **space_key**: The space where pages will be created (e.g., "PROJ", "TEAM")
+- **parent_page_id**: (Optional) ID of parent page to create reports under
+
+### Advanced Usage
+
+```bash
+# Push with custom title
+report-gen push-confluence report.html --title "Weekly Sprint Report"
+
+# Push to different space
+report-gen push-confluence report.html --space "REPORTS"
+
+# Create page under a parent
+report-gen push-confluence report.html --parent-id "123456789"
+
+# Update existing page (same title = update)
+report-gen push-confluence report.html
+```
+
+**Features:**
+- Automatic page creation or update (based on title)
+- Supports parent pages for organizing reports
+- Preserves HTML formatting and styling
+- Returns direct URL to published page
+
 ## Python API
 
 Use programmatically in your Python code:
