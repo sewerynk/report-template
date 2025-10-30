@@ -1,0 +1,27 @@
+# Minimal tasks example - only JIRA IDs required!
+# Run: report-gen sync-jira minimal_tasks.yaml
+# All task data will be automatically fetched from JIRA
+
+title: "Weekly Sprint Report"
+project_name: "My Project"
+author: "Your Name"
+summary: "Tasks from current sprint"
+
+tasks:
+  # Just add the JIRA ticket IDs
+  - jira_id: K2A-1237
+
+  - jira_id: K2A-1238
+
+  - jira_id: K2A-1239
+
+# After running sync-jira, all fields will be populated:
+# - title (from JIRA summary)
+# - status (from JIRA status)
+# - assignee (from JIRA assignee)
+# - priority (from JIRA priority)
+# - due_date (from JIRA due date)
+# - target_start_date (from JIRA custom fields)
+# - target_end_date (from JIRA custom fields)
+# - description (from JIRA description)
+# - tags (from JIRA labels)

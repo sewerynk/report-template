@@ -146,29 +146,42 @@ The DOCX format is ideal for:
 
 Automatically fetch task data from your JIRA server!
 
-### Quick Start with JIRA
+### Method 1: Minimal YAML with Auto-Sync (Easiest!)
+
+Create a YAML file with just JIRA ticket IDs - all data is fetched automatically:
 
 ```bash
 # 1. Setup JIRA configuration (one-time setup)
 cp .jira.config.example.yaml .jira.config.yaml
-# Edit with your JIRA URL, username, and API token
+# Edit with your JIRA URL and Personal Access Token (PAT)
 
-# 2. Fetch tasks by ticket IDs
-report-gen fetch-tickets PROJ-123 PROJ-124 PROJ-125 -o tasks.yaml
+# 2. Create a minimal YAML file (my_tasks.yaml):
+cat > my_tasks.yaml << 'EOF'
+title: "Weekly Report"
+project_name: "My Project"
+author: "Your Name"
+tasks:
+  - jira_id: K2A-1237
+  - jira_id: K2A-1238
+  - jira_id: K2A-1239
+EOF
 
-# 3. Generate report with JIRA data
-report-gen generate tasks.yaml -t feature_dev -o report.docx
+# 3. Sync to fetch all task data from JIRA
+report-gen sync-jira my_tasks.yaml
+
+# 4. Generate report with complete JIRA data
+report-gen generate my_tasks.yaml -t feature_dev -o report.docx
 ```
 
-**That's it!** All task data (title, status, assignee, dates, etc.) is automatically fetched from JIRA.
+**That's it!** All task data (title, status, assignee, dates, etc.) is automatically fetched from JIRA and saved to your YAML file.
 
-### Sync Existing Tasks
+### Method 2: Fetch Tickets Directly
 
-You can also sync existing data files with JIRA to update task information:
+Alternatively, fetch specific tickets from command line:
 
 ```bash
-# Update tasks that have jira_id field
-report-gen sync-jira feature_data.yaml
+report-gen fetch-tickets K2A-1237 K2A-1238 K2A-1239 -o tasks.yaml
+report-gen generate tasks.yaml -t feature_dev -o report.docx
 ```
 
 **What gets fetched:**
@@ -176,6 +189,8 @@ report-gen sync-jira feature_data.yaml
 - Status, priority, and assignee
 - Due dates and target dates
 - JIRA ticket IDs and labels
+
+**Tip:** Method 1 (minimal YAML + sync) is recommended for regular reports, as you can keep your task list and just re-sync to get latest data!
 
 See the [JIRA Integration Guide](docs/jira-integration.md) for detailed setup and usage.
 

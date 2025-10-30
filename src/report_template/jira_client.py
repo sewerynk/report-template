@@ -210,11 +210,30 @@ class JiraClient:
         """
         Sync task data with JIRA for tasks that have jira_id.
 
+        This method allows you to create minimal tasks with just jira_id,
+        and all other fields will be automatically fetched from JIRA.
+
         Args:
-            task_list: List of task dictionaries
+            task_list: List of task dictionaries. Each task can be minimal:
+                       {"jira_id": "PROJ-123"}
+                       Or have additional local overrides.
 
         Returns:
             Updated list of task dictionaries with JIRA data
+
+        Example:
+            Minimal task in YAML:
+                tasks:
+                  - jira_id: K2A-1237
+
+            After sync, this will have all fields populated from JIRA:
+                tasks:
+                  - jira_id: K2A-1237
+                    title: "Implement user authentication"
+                    status: In Progress
+                    assignee: John Doe
+                    priority: High
+                    # ... all other fields from JIRA
         """
         updated_tasks = []
 
@@ -228,15 +247,18 @@ class JiraClient:
                     jira_data = self.issue_to_task_data(issue)
 
                     # Merge JIRA data with existing task data
-                    # Keep local data if JIRA field is empty
+                    # JIRA data overwrites local data if JIRA has a value
                     for key, value in jira_data.items():
                         if value is not None and value != '':
                             task[key] = value
 
-                    print(f"✓ Synced {jira_id}: {task.get('title')}")
+                    print(f"✓ Synced {jira_id}: {task.get('title', 'Unknown')}")
 
                 except Exception as e:
                     print(f"✗ Failed to sync {jira_id}: {str(e)}")
+            else:
+                # Task without jira_id - keep as is
+                pass
 
             updated_tasks.append(task)
 
