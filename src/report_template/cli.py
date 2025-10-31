@@ -709,12 +709,25 @@ def push_confluence(
         click.echo("Preparing HTML for Confluence...")
         html_content = confluence_client.prepare_html_for_confluence(html_content)
 
-        # Save debug file if requested
+        # Always save debug file with line numbers for troubleshooting
+        debug_file = report_path.with_suffix('.confluence-debug.html')
+        debug_numbered_file = report_path.with_suffix('.confluence-debug-numbered.txt')
+
+        # Save clean HTML
+        with open(debug_file, 'w', encoding='utf-8') as f:
+            f.write(html_content)
+
+        # Save numbered version for easier debugging
+        lines = html_content.split('\n')
+        with open(debug_numbered_file, 'w', encoding='utf-8') as f:
+            for i, line in enumerate(lines, 1):
+                f.write(f"{i:4d} | {line}\n")
+
         if debug:
-            debug_file = report_path.with_suffix('.confluence-debug.html')
-            with open(debug_file, 'w', encoding='utf-8') as f:
-                f.write(html_content)
-            click.echo(f"Debug: Sanitized HTML saved to {debug_file}")
+            click.echo(f"\nDebug files created:")
+            click.echo(f"  - {debug_file} (clean HTML)")
+            click.echo(f"  - {debug_numbered_file} (with line numbers)")
+            click.echo(f"\nIf you get an error at [row,col], check line number in the numbered file")
 
         # Determine space key
         space_key = space or confluence_config.get('space_key')
@@ -757,7 +770,45 @@ def push_confluence(
         )
         sys.exit(1)
     except Exception as e:
-        click.echo(f"Error: {str(e)}", err=True)
+        error_msg = str(e)
+        click.echo(f"Error: {error_msg}", err=True)
+
+        # Try to extract row/col from XHTML parsing error and show the problematic line
+        import re as error_re
+        match = error_re.search(r'\[row,col.*?\]:\s*\[(\d+),(\d+)\]', error_msg)
+        if match:
+            row = int(match.group(1))
+            col = int(match.group(2))
+
+            click.echo(f"\n📍 Error location: Line {row}, Column {col}", err=True)
+
+            # Try to show the problematic line
+            try:
+                lines = html_content.split('\n')
+                if row <= len(lines):
+                    problematic_line = lines[row - 1]
+                    click.echo(f"\nProblematic line {row}:", err=True)
+                    click.echo(f"  {problematic_line}", err=True)
+
+                    # Show character at the specific column
+                    if col <= len(problematic_line):
+                        click.echo(f"\nCharacter at column {col}: '{problematic_line[col-1]}'", err=True)
+                        # Show context around the error
+                        start = max(0, col - 20)
+                        end = min(len(problematic_line), col + 20)
+                        context = problematic_line[start:end]
+                        pointer = ' ' * (col - 1 - start) + '^'
+                        click.echo(f"Context: {context}", err=True)
+                        click.echo(f"         {pointer}", err=True)
+            except:
+                pass
+
+            click.echo(f"\n📝 Debug files created for inspection:", err=True)
+            click.echo(f"   - {debug_numbered_file}", err=True)
+            click.echo(f"   Check line {row} in the numbered file\n", err=True)
+        else:
+            click.echo(f"\n📝 Debug file created: {debug_numbered_file}", err=True)
+
         sys.exit(1)
 
 
